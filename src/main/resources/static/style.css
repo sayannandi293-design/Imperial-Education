@@ -55,3 +55,5 @@
 .support-chat-compose textarea{flex:1;min-width:150px;margin:0!important;max-height:110px;resize:vertical;font:inherit;border:1px solid #cbd5e1;border-radius:9px;padding:10px}
 .support-chat-compose button{align-self:center}.support-chat-status{width:100%;font-size:12px;margin:0;color:#b42318}
 @media(max-width:620px){.support-chat-layout{grid-template-columns:1fr}.support-chat-list{max-height:145px;border-right:0;border-bottom:1px solid #e2e8f0}.support-chat-person{padding:10px 12px}.support-chat-messages{max-height:380px}.support-chat-thread{min-height:380px}}
+
+.support-chat-header .support-chat-delete{align-self:flex-end;margin-top:4px;padding:8px 12px;font-size:12px}.support-chat-header .support-chat-delete:disabled{opacity:.5;cursor:not-allowed}
