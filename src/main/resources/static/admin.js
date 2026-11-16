@@ -43,10 +43,25 @@ function render(){
  }
 }
 async function request(url,method,data){
- if(!csrf)throw Error('Security token unavailable.');
- const response=await fetch(url,{method,headers:{[csrf.headerName]:csrf.token,...(data?{'Content-Type':'application/json'}:{})},body:data?JSON.stringify(data):undefined});
- if(!response.ok)throw Error('Request failed (HTTP '+response.status+'). Check the details and try again.');
- return response.status===204?null:response.json();
+ if(!csrf)throw Error('Security token unavailable. Please refresh and sign in as admin.');
+ const response=await fetch(url,{method,credentials:'same-origin',redirect:'manual',headers:{'Accept':'application/json',[csrf.headerName]:csrf.token,...(data?{'Content-Type':'application/json'}:{})},body:data?JSON.stringify(data):undefined});
+ if(response.type==='opaqueredirect'||response.status===401||response.status===403){
+  throw Error('Admin session expired or access denied. Open /login, sign in again, then check Available courses before retrying.');
+ }
+ if(!response.ok){
+  const contentType=response.headers.get('content-type')||'';
+  let detail='';
+  if(contentType.includes('application/json')){
+   try{const body=await response.json();detail=body.detail||body.message||body.error||''}catch{}
+  }
+  throw Error('Save failed (HTTP '+response.status+'). '+detail+' Check Render Logs if the problem continues.');
+ }
+ if(response.status===204)return null;
+ const contentType=response.headers.get('content-type')||'';
+ if(!contentType.includes('application/json')){
+  throw Error('Server returned an unexpected page instead of JSON. Check Available courses before submitting again; if not saved, sign in again and check Render Logs.');
+ }
+ return response.json();
 }
 function resetForm(){editingId=null;form.reset();document.querySelector('#form-heading').textContent='Add a new course';document.querySelector('#save-btn').textContent='Save Course';document.querySelector('#cancel-btn').hidden=true}
 document.querySelector('#cancel-btn').onclick=resetForm;
