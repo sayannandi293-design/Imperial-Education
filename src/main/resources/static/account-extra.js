@@ -25,12 +25,69 @@
    }
   }catch(e){area.textContent=e.message}
  }
- async function tickets(){
+ let currentChat=null,chatRefresh=null;
+ async function tickets(selectId){
   const area=document.querySelector('#student-tickets');area.replaceChildren();
+  if(chatRefresh){clearInterval(chatRefresh);chatRefresh=null}
   try{
-   const data=await api('/api/student/tickets');
-   if(!data.length)area.textContent='No support tickets yet.';
-   for(const t of data)item(area,'#'+t.id+' · '+t.subject,t.status+' · '+t.message+(t.adminReply?' · Support reply: '+t.adminReply:''));
+   const items=await api('/api/student/tickets');
+   if(!items.length){area.textContent='No conversations yet. Create a support ticket above.';return}
+   const layout=document.createElement('div');layout.className='support-chat-layout';
+   const list=document.createElement('div');list.className='support-chat-list';
+   const thread=document.createElement('div');thread.className='support-chat-thread';
+   layout.append(list,thread);area.append(layout);
+   const buttons=[];
+   async function open(ticket){
+    currentChat=ticket.id;
+    buttons.forEach(b=>b.classList.toggle('selected',Number(b.dataset.id)===currentChat));
+    thread.replaceChildren();
+    const header=document.createElement('div');header.className='support-chat-header';
+    const title=document.createElement('strong');title.textContent='#'+ticket.id+' · '+ticket.subject;
+    const small=document.createElement('small');small.textContent='IMPERIAL EDUCATION Support';
+    header.append(title,small);thread.append(header);
+    const feed=document.createElement('div');feed.className='support-chat-messages';
+    feed.setAttribute('aria-live','polite');thread.append(feed);
+    const form=document.createElement('form');form.className='support-chat-compose';
+    const input=document.createElement('textarea');input.rows=2;input.maxLength=3000;input.required=true;input.placeholder='Type a message…';
+    const send=document.createElement('button');send.className='admin-button';send.type='submit';send.textContent='Send';
+    const status=document.createElement('p');status.className='support-chat-status';status.setAttribute('role','status');
+    form.append(input,send,status);thread.append(form);
+    const load=async(forceScroll=false)=>{
+     if(currentChat!==ticket.id)return;
+     try{
+      const messages=await api('/api/student/tickets/'+ticket.id+'/messages');
+      if(currentChat!==ticket.id)return;
+      const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<110;
+      feed.replaceChildren();
+      for(const m of messages){
+       const bubble=document.createElement('div');bubble.className='support-bubble '+(m.sender==='STUDENT'?'outgoing':'incoming');
+       const p=document.createElement('p');p.textContent=m.body;
+       const time=document.createElement('small');
+       time.textContent=(m.sender==='STUDENT'?'You · ':'Support · ')+new Date(m.createdAt).toLocaleString();
+       bubble.append(p,time);feed.append(bubble);
+      }
+      if(forceScroll||nearBottom)feed.scrollTop=feed.scrollHeight;
+     }catch(e){status.textContent=e.message}
+    };
+    form.onsubmit=async e=>{
+     e.preventDefault();const body=input.value.trim();if(!body)return;
+     send.disabled=true;status.textContent='';
+     try{await api('/api/student/tickets/'+ticket.id+'/messages','POST',{body});input.value='';await load(true)}
+     catch(e){status.textContent=e.message}
+     finally{send.disabled=false}
+    };
+    await load(true);
+    if(chatRefresh)clearInterval(chatRefresh);
+    chatRefresh=setInterval(()=>{if(currentChat===ticket.id&&!document.hidden)load()},6000);
+   }
+   for(const t of items){
+    const button=document.createElement('button');button.type='button';button.className='support-chat-person';button.dataset.id=t.id;
+    const title=document.createElement('strong');title.textContent='IMPERIAL EDUCATION Support';
+    const subject=document.createElement('span');subject.textContent='#'+t.id+' · '+t.subject;
+    const snippet=document.createElement('small');snippet.textContent=t.adminReply||t.message;
+    button.append(title,subject,snippet);button.onclick=()=>open(t);list.append(button);buttons.push(button);
+   }
+   await open(items.find(t=>t.id===selectId)||items[0]);
   }catch(e){area.textContent=e.message}
  }
  document.querySelector('#student-ticket-form').onsubmit=async e=>{
