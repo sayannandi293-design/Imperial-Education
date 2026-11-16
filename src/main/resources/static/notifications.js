@@ -31,7 +31,7 @@
   if(typeof value!=='string')return null;
   try{
    const url=new URL(value,location.origin);
-   return url.origin===location.origin && (url.pathname==='/admin.html'||url.pathname==='/account.html')?url.pathname+url.hash:null;
+   return url.origin===location.origin && (url.pathname==='/admin.html'||url.pathname==='/account.html'||url.pathname==='/')?url.pathname+url.hash:null;
   }catch{return null}
  }
  async function load(showErrors=false){
@@ -57,7 +57,7 @@
     const destination=safeTarget(n.target);
     if(destination){
      const link=document.createElement('a');link.href=destination;
-     link.textContent=n.category==='SUPPORT'?'Open Support Chat':n.category==='PAYMENT'?'View Payment / Course':'Open Details';
+     link.textContent=n.category==='SUPPORT'?'Open Support Chat':n.category==='PAYMENT'?'View Payment / Course':n.category==='OFFER'?'View Offers':'Open Details';
      link.addEventListener('click',async e=>{
       e.preventDefault();
       if(!n.read){try{await markRead(n.id)}catch(error){status.textContent=error.message}}
