@@ -26,20 +26,45 @@ function showDetails(course){
  details.append(h,p,price,document.createElement('hr'),buy,note);
  dialog.showModal();
 }
-fetch('/api/courses').then(async r=>{if(!r.ok)throw Error('Unable to load courses');return r.json()}).then(courses=>{
+let availableCourses=[];
+const searchInput=document.querySelector('#course-search');
+const categorySelect=document.querySelector('#course-category');
+function courseCategory(title){
+ const name=(title||'').toLowerCase();
+ const categories=[['UPSC / Civil Services',/upsc|ias|civil service|psc/],['SSC / Railways',/ssc|railway|rrb/],['Banking',/bank|ibps|sbi|rbi/],['School / College',/class |school|college|university|bsc|btech/],['Technology',/web|coding|programming|python|java|software/]];
+ return (categories.find(c=>c[1].test(name))||['Other'])[0];
+}
+function renderCourses(){
+ const search=searchInput.value.toLowerCase().trim(),category=categorySelect.value;
+ const filtered=availableCourses.filter(c=>(category==='all'||courseCategory(c.title)===category)&&
+ (c.title+' '+(c.description||'')).toLowerCase().includes(search));
  list.replaceChildren();
- if(!courses.length){list.textContent='New courses are coming soon. Check back shortly.';return;}
- for(const c of courses){
- const card=document.createElement('article');card.className='course-card';
- const img=imageFor(c);if(img)card.append(img);
- const title=document.createElement('h3');title.textContent=c.title;
- const price=document.createElement('div');price.className='price';price.textContent='₹'+(c.priceInPaise/100).toLocaleString('en-IN');
- const actions=document.createElement('div');actions.className='course-actions';
- const view=document.createElement('button');view.className='admin-button';view.textContent='View Details';view.addEventListener('click',()=>showDetails(c));
- const buy=document.createElement('button');buy.className='secondary-button';buy.textContent='Buy Now';buy.addEventListener('click',()=>{window.location.href='/checkout.html?course='+encodeURIComponent(c.id)});
- actions.append(view,buy);card.append(title,price,actions);list.append(card);
+ document.querySelector('#course-count').textContent=filtered.length+' course'+(filtered.length===1?'':'s')+' found';
+ if(!filtered.length){list.textContent='No matching courses found. Try a different search.';return}
+ for(const c of filtered){
+  const card=document.createElement('article');card.className='course-card';
+  const img=imageFor(c);if(img)card.append(img);
+  const title=document.createElement('h3');title.textContent=c.title;
+  const price=document.createElement('div');price.className='price';
+  price.textContent='₹'+(c.priceInPaise/100).toLocaleString('en-IN');
+  const actions=document.createElement('div');actions.className='course-actions';
+  const view=document.createElement('button');view.className='admin-button';view.textContent='View Details';
+  view.addEventListener('click',()=>showDetails(c));
+  const buy=document.createElement('button');buy.className='secondary-button';buy.textContent='Buy Now';
+  buy.addEventListener('click',()=>{window.location.href='/checkout.html?course='+encodeURIComponent(c.id)});
+  actions.append(view,buy);card.append(title,price,actions);list.append(card);
  }
+}
+searchInput.addEventListener('input',renderCourses);
+categorySelect.addEventListener('change',renderCourses);
+fetch('/api/courses').then(async r=>{if(!r.ok)throw Error('Unable to load courses');return r.json()}).then(courses=>{
+ availableCourses=courses;
+ if(!courses.length){list.textContent='New courses are coming soon. Check back shortly.';return}
+ const categories=[...new Set(courses.map(c=>courseCategory(c.title)))].sort();
+ for(const category of categories){const option=document.createElement('option');option.value=category;option.textContent=category;categorySelect.append(option)}
+ renderCourses();
 }).catch(()=>list.textContent='Courses are temporarily unavailable.');
+
 
 async function updateNavigation(){
  try{
