@@ -124,6 +124,23 @@
    status.textContent=r.message;e.target.reset();
   }catch(err){status.textContent=err.message}
  };
+ async function profile(){
+  const status=document.querySelector('#edit-profile-message');
+  try{
+   const r=await api('/api/account/me');
+   document.querySelector('#edit-profile-name').value=r.fullName;
+   document.querySelector('#edit-profile-email').value=r.email;
+  }catch(e){status.textContent=e.message}
+ }
+ document.querySelector('#edit-profile-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const status=document.querySelector('#edit-profile-message');
+  try{
+   const info=await api('/api/account/me','PUT',{fullName:document.querySelector('#edit-profile-name').value.trim()});
+   status.textContent='Profile updated successfully.';
+   document.querySelector('#welcome').textContent='Welcome, '+info.fullName+' ('+info.email+')';
+  }catch(e){status.textContent=e.message}
+ });
  async function receipts(){
   const area=document.querySelector('#my-payments');
   if(!area)return;
@@ -155,10 +172,13 @@
      }catch(e){alert(e.message)}
     };
     rows[i].append(button);
+    if(p.status==='APPROVED'){
+     const invoice=document.createElement('a');invoice.className='secondary-button';invoice.href='/invoice.html?order='+encodeURIComponent(p.id);invoice.textContent='Print Invoice';invoice.style.marginLeft='8px';invoice.target='_blank';invoice.rel='noopener noreferrer';rows[i].append(invoice);
+    }
    });
   }catch{}
  }
- await Promise.all([wishlist(),tickets(),reviewCourses()]);
+ await Promise.all([wishlist(),tickets(),reviewCourses(),profile()]);
  // Original account.js may still be rendering; retrieve receipt rows after its async requests.
  const ready=setInterval(()=>{
   const area=document.querySelector('#my-payments');
