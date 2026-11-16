@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UPI Checkout | IMPERIAL EDUCATION</title><link rel="stylesheet" href="/style.css"></head>
+<body><header class="bar"><a href="/" class="logo">✦ IMPERIAL <span>EDUCATION</span></a><nav><a href="/#courses">Courses</a><a href="/account.html">My Account</a></nav></header>
+<main class="checkout-layout"><div class="eyebrow">MANUAL UPI PAYMENT</div><h1>Complete your course payment</h1>
+<div class="checkout-panel"><h2 id="checkout-course">Loading course…</h2><p id="checkout-price" class="price"></p>
+<p>Pay the exact amount using your UPI app. After payment, enter the transaction reference (UTR). Payment requests are reviewed manually and do not provide immediate access.</p>
+<div id="payment-information" hidden>
+<h3>Pay to the following UPI account</h3><p id="payment-payee"></p><div id="upi-address" class="upi-code"></div>
+<img id="upi-qr" class="upi-qr" alt="Merchant UPI QR code" hidden>
+<a id="upi-launch" class="admin-button" style="display:inline-block;text-decoration:none" hidden>Open UPI app</a>
+<p class="warning-note">Confirm the recipient name and UPI ID in your UPI app before sending. Never share your UPI PIN or OTP here.</p>
+<hr><h3>Submit payment reference</h3><form id="payment-form"><label for="payment-utr">UPI Transaction ID / UTR</label><input id="payment-utr" required minlength="6" maxlength="35" placeholder="Reference number from your UPI app" autocomplete="off"><button class="admin-button" type="submit" id="submit-utr">Submit for verification</button></form></div>
+<p id="checkout-message" role="status" aria-live="polite"></p></div></main><script src="/checkout.js"></script></body></html>
