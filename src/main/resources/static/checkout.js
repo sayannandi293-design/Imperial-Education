@@ -25,6 +25,11 @@ async function init(){
   }
   setPayLink(course.priceInPaise);
   payment.hidden=false;
+  const suggested=new URLSearchParams(location.search).get('coupon');
+  if(suggested&&/^[A-Za-z0-9_-]{3,40}$/.test(suggested)){
+   document.querySelector('#coupon-code').value=suggested;
+   document.querySelector('#apply-coupon').click();
+  }
  }catch(e){msg.textContent=e.message}
 }
 document.querySelector('#payment-form').addEventListener('submit',async e=>{
