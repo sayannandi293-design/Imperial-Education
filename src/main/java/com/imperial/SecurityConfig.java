@@ -18,8 +18,7 @@ public class SecurityConfig {
    }
    StudentAccount a=accounts.findByEmail(username.toLowerCase(java.util.Locale.ROOT))
      .orElseThrow(()->new UsernameNotFoundException("Account not found"));
-   return User.withUsername(a.getEmail()).password(a.getPasswordHash())
-     .disabled(a.isVerificationRequired()&&!a.isEmailVerified()).roles("STUDENT").build();
+   return User.withUsername(a.getEmail()).password(a.getPasswordHash()).roles("STUDENT").build();
   };
  }
  @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
