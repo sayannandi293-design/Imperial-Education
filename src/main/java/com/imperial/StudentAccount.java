@@ -12,5 +12,6 @@ public class StudentAccount {
  public Long getId(){return id;}
  public String getFullName(){return fullName;}
  public String getEmail(){return email;}
- public String getPasswordHash(){return passwordHash;}\n public void setPasswordHash(String hash){this.passwordHash=hash;}
+ public String getPasswordHash(){return passwordHash;}
+ public void setPasswordHash(String hash){this.passwordHash=hash;}
 }
