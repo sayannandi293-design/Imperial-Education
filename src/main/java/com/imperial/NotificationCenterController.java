@@ -14,9 +14,10 @@ public class NotificationCenterController {
  private final SupportTicketRepository tickets;
  private final TicketChatMessageRepository chats;
  private final NotificationReadRepository reads;
+ private final CouponRepository coupons;
  public NotificationCenterController(StudentAccountRepository students,ManualPaymentRepository payments,
-  SupportTicketRepository tickets,TicketChatMessageRepository chats,NotificationReadRepository reads){
-  this.students=students;this.payments=payments;this.tickets=tickets;this.chats=chats;this.reads=reads;
+  SupportTicketRepository tickets,TicketChatMessageRepository chats,NotificationReadRepository reads,CouponRepository coupons){
+  this.students=students;this.payments=payments;this.tickets=tickets;this.chats=chats;this.reads=reads;this.coupons=coupons;
  }
  public record Notice(String id,String title,String message,String category,String target,Instant occurredAt,boolean read){}
  public record NoticeList(long unreadCount,List<Notice> items){}
@@ -45,6 +46,13 @@ public class NotificationCenterController {
    }
   }else{
    Long id=Long.valueOf(recipient.substring("STUDENT:".length()));
+   for(CourseCoupon c:coupons.findAll()){
+    if(c.active && (c.maxUses==0||c.usedCount<c.maxUses) && c.publishedAt!=null){
+     events.add(new Notice("offer-"+c.id,"New course offer: "+c.discountPercent+"% OFF",
+      "Use coupon "+c.code+" at checkout to get "+c.discountPercent+"% discount on eligible courses.",
+      "OFFER","/account.html#notifications",c.publishedAt,false));
+    }
+   }
    for(ManualPayment pay:payments.findByStudent_IdOrderByCreatedAtDesc(id)){
     String state=pay.getStatus().name();
     String title=switch(state){case "APPROVED"->"Payment approved — course unlocked";case "REJECTED"->"Payment request rejected";default->"Payment awaiting review";};
