@@ -60,5 +60,22 @@ public class TicketChatController {
  @PostMapping("/api/admin/tickets/{id}/messages") @ResponseStatus(HttpStatus.CREATED) @Transactional
  public ChatMessage adminSend(@PathVariable Long id,Principal principal,@Valid @RequestBody MessageInput input){
   return send(id,principal,true,input);
+ } 
+ private void deleteConversation(Long id,Principal principal,boolean admin){
+  SupportTicket ticket=find(id,principal,admin);
+  messages.deleteAll(messages.findByTicket_IdOrderByCreatedAtAscIdAsc(id));
+  messages.flush();
+  tickets.delete(ticket);
  }
+ @DeleteMapping("/api/student/tickets/{id}")
+ @ResponseStatus(HttpStatus.NO_CONTENT) @Transactional
+ public void studentDelete(@PathVariable Long id,Principal principal){
+  deleteConversation(id,principal,false);
+ }
+ @DeleteMapping("/api/admin/tickets/{id}")
+ @ResponseStatus(HttpStatus.NO_CONTENT) @Transactional
+ public void adminDelete(@PathVariable Long id,Principal principal){
+  deleteConversation(id,principal,true);
+ }
+
 }
