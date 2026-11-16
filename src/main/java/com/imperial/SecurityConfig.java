@@ -22,7 +22,8 @@ public class SecurityConfig {
   };
  }
  @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
-  return http.authorizeHttpRequests(a->a
+  return http.csrf(csrf->csrf.csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler()))
+   .authorizeHttpRequests(a->a
     .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/visit").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/courses","/api/courses/**").permitAll()
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/api/admin/**").hasRole("ADMIN")
