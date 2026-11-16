@@ -63,7 +63,7 @@ function renderCourses(){
    try{
     const session=await (await fetch('/api/session')).json();
     if(!session.signedIn||session.role!=='STUDENT'){window.location.href='/login';return}
-    const response=await fetch('/api/student/wishlist/'+encodeURIComponent(c.id),{method:'POST',headers:{[session.csrfHeaderName||'X-CSRF-TOKEN']:session.csrfToken}});
+    const response=await fetch('/api/student/wishlist/'+encodeURIComponent(c.id),{method:'POST',headers:{[session.csrfHeader||'X-CSRF-TOKEN']:session.csrfToken}});
     if(!response.ok)throw Error();save.textContent='♥ Saved';save.disabled=true;
    }catch{alert('Could not save. Sign in as a student and retry.')}
   };
