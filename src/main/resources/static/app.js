@@ -33,11 +33,10 @@ fetch('/api/courses').then(async r=>{if(!r.ok)throw Error('Unable to load course
  const card=document.createElement('article');card.className='course-card';
  const img=imageFor(c);if(img)card.append(img);
  const title=document.createElement('h3');title.textContent=c.title;
- const description=document.createElement('p');description.className='course-excerpt';description.textContent=c.description||'Explore this course.';
  const price=document.createElement('div');price.className='price';price.textContent='₹'+(c.priceInPaise/100).toLocaleString('en-IN');
  const actions=document.createElement('div');actions.className='course-actions';
  const view=document.createElement('button');view.className='admin-button';view.textContent='View Details';view.addEventListener('click',()=>showDetails(c));
  const buy=document.createElement('button');buy.className='secondary-button';buy.textContent='Buy Now · Coming soon';buy.disabled=true;
- actions.append(view,buy);card.append(title,description,price,actions);list.append(card);
+ actions.append(view,buy);card.append(title,price,actions);list.append(card);
  }
 }).catch(()=>list.textContent='Courses are temporarily unavailable.');
