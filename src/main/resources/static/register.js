@@ -25,7 +25,7 @@ form.addEventListener('submit',async e=>{
   });
   if(r.ok){
    form.reset();status.replaceChildren();
-   const p=document.createElement('p');p.textContent='Account created! Check your email for the verification link before signing in.';
+   const p=document.createElement('p');p.textContent='Account created successfully! You can now sign in with your email and password.';
    const a=document.createElement('a');a.href='/login';a.textContent='Go to Sign In';
    status.append(p,a);return;
   }
@@ -36,7 +36,7 @@ form.addEventListener('submit',async e=>{
    403:'Security check failed (HTTP 403). Refresh the page, then retry. If this continues, contact support with the HTTP code.',
    409:'This email address is already registered. Please use Sign In or Forgot Password.',
    429:'Too many attempts. Try again later.',
-   503:'Email verification is not available (HTTP 503). The administrator must configure SMTP email delivery. If you already created an account, try Resend Verification.',
+   503:'Registration is temporarily unavailable (HTTP 503). Please try again later.',
    500:'Server error (HTTP 500). The administrator should check Render logs at the time of this request.'
   };
   status.textContent=messages[r.status]||'Registration failed (HTTP '+r.status+'). Contact support with this status code.';
