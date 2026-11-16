@@ -125,7 +125,7 @@ public class CommerceController {
   SupportTicket t=tickets.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
   t.adminReply=input.reply().trim();t.status="RESOLVED";return tv(tickets.save(t));
  }
- @PostMapping("/api/visit") public Map<String,Boolean> countVisit(){
+ @PostMapping("/api/visit") @Transactional public Map<String,Boolean> countVisit(){
   visitors.incrementOrInsert(LocalDate.now(ZoneOffset.UTC).toString());
   return Map.of("recorded",true);
  }
