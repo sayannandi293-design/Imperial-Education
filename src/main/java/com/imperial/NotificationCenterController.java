@@ -32,15 +32,15 @@ public class NotificationCenterController {
     if(pay.getStatus()==ManualPayment.Status.PENDING)
      events.add(new Notice("payment-"+pay.getId(),"New payment request",
        pay.getStudent().getFullName()+" submitted a UPI reference for "+pay.getCourse().getTitle(),
-       "PAYMENT","/admin.html#admin-manual-upi-payment-requests-10",pay.getCreatedAt(),false));
+       "PAYMENT","/admin.html#admin-manual-upi-payment-requests-11",pay.getCreatedAt(),false));
    }
    for(SupportTicket t:tickets.findAllByOrderByCreatedAtDesc()){
     events.add(new Notice("ticket-"+t.id,"New support ticket",
-      t.student.getFullName()+": "+t.subject,"SUPPORT","/admin.html#admin-support-tickets-7",t.createdAt,false));
+      t.student.getFullName()+": "+t.subject,"SUPPORT","/admin.html#admin-support-tickets-8",t.createdAt,false));
     for(TicketChatMessage m:chats.findByTicket_IdOrderByCreatedAtAscIdAsc(t.id)){
      if("STUDENT".equals(m.getSender()))
       events.add(new Notice("chat-"+m.getId(),"Student support message",
-        t.student.getFullName()+": "+shortText(m.getBody()),"SUPPORT","/admin.html#admin-support-tickets-7",m.getCreatedAt(),false));
+        t.student.getFullName()+": "+shortText(m.getBody()),"SUPPORT","/admin.html#admin-support-tickets-8",m.getCreatedAt(),false));
     }
    }
   }else{
