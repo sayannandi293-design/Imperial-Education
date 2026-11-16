@@ -17,6 +17,8 @@ async function init(){
   populateTelegramCourses();
   await loadTelegram();
   await loadPayments();
+  await loadInsights();
+  await loadStudents();
  }catch(e){message.textContent=e.message}
 }
 async function reload(){
@@ -144,3 +146,52 @@ document.querySelector('#remove-telegram').addEventListener('click',async()=>{
   document.querySelector('#telegram-message').textContent='Telegram group link removed.';
  }catch(e){document.querySelector('#telegram-message').textContent=e.message}
 });
+
+async function loadInsights(){
+ const panel=document.querySelector('#sales-insights');panel.replaceChildren();
+ try{
+  const response=await fetch('/api/admin/insights');
+  if(!response.ok)throw Error('Unable to load sales dashboard.');
+  const stats=await response.json();
+  const values=[
+   ['Registered Students',stats.students],
+   ['Courses',stats.courses],
+   ['Approved Payments',stats.approved],
+   ['Pending Payments',stats.pending],
+   ['Rejected Payments',stats.rejected],
+   ['Verified Revenue','₹'+(stats.approvedRevenueInPaise/100).toLocaleString('en-IN',{minimumFractionDigits:2})]
+  ];
+  const grid=document.createElement('div');grid.className='insights-grid';
+  for(const [label,value] of values){
+   const card=document.createElement('div');card.className='insight-tile';
+   const heading=document.createElement('span');heading.textContent=label;
+   const strong=document.createElement('strong');strong.textContent=value;
+   card.append(heading,strong);grid.append(card);
+  }
+  const note=document.createElement('p');note.className='checkout-note';note.textContent='Revenue is the total recorded amount of approved UPI submissions; bank reconciliation is performed manually.';
+  panel.append(grid,note);
+ }catch(e){panel.textContent=e.message}
+}
+async function loadStudents(){
+ const panel=document.querySelector('#student-management');panel.replaceChildren();
+ try{
+  const response=await fetch('/api/admin/students');
+  if(!response.ok)throw Error('Unable to load students.');
+  const students=await response.json();
+  if(!students.length){panel.textContent='No registered students yet.';return}
+  const query=document.createElement('input');query.type='search';query.placeholder='Search students by name or email';query.className='student-search';
+  const rows=document.createElement('div');
+  function render(){
+   rows.replaceChildren();
+   const filtered=students.filter(s=>(s.fullName+' '+s.email).toLowerCase().includes(query.value.toLowerCase().trim()));
+   for(const s of filtered){
+    const row=document.createElement('div');row.className='payment-row';
+    const heading=document.createElement('strong');heading.textContent=s.fullName;
+    const info=document.createElement('p');info.textContent=s.email+' · Approved courses: '+s.approvedCourses+' · Pending requests: '+s.pendingRequests;
+    row.append(heading,info);rows.append(row);
+   }
+   if(!filtered.length)rows.textContent='No matching student.';
+  }
+  query.addEventListener('input',render);panel.append(query,rows);render();
+ }catch(e){panel.textContent=e.message}
+}
