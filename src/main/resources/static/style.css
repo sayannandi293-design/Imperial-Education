@@ -57,3 +57,15 @@
 @media(max-width:620px){.support-chat-layout{grid-template-columns:1fr}.support-chat-list{max-height:145px;border-right:0;border-bottom:1px solid #e2e8f0}.support-chat-person{padding:10px 12px}.support-chat-messages{max-height:380px}.support-chat-thread{min-height:380px}}
 
 .support-chat-header .support-chat-delete{align-self:flex-end;margin-top:4px;padding:8px 12px;font-size:12px}.support-chat-header .support-chat-delete:disabled{opacity:.5;cursor:not-allowed}
+
+/* Admin topic accordions: details are hidden until the admin clicks a title. */
+.admin-container>.admin-topic{display:block;width:100%;margin:18px auto;border:1px solid #e2e8f0;border-radius:14px;background:#fff;box-shadow:0 6px 22px #142a4010;overflow:hidden}
+.admin-topic-title{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:20px 23px;font-size:19px;font-weight:750;color:#173862;list-style:none;user-select:none}
+.admin-topic-title::-webkit-details-marker{display:none}
+.admin-topic-title:hover{background:#f1f5f9}
+.admin-topic-title:focus-visible{outline:3px solid #f1b959;outline-offset:-3px}
+.admin-topic-arrow{font-size:26px;line-height:1;transition:transform .18s}
+.admin-topic[open] .admin-topic-arrow{transform:rotate(180deg)}
+.admin-topic>.admin-panel{width:100%;max-width:unset!important;margin:0!important;box-shadow:none!important;border:0!important;border-top:1px solid #e2e8f0!important;border-radius:0!important}
+.admin-topic-inner-title{font-size:17px;margin-top:0}
+@media(max-width:600px){.admin-topic-title{padding:16px;font-size:16px}}
