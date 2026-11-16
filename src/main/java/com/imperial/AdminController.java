@@ -12,7 +12,7 @@ public class AdminController {
  private final CourseRepository repository;
  public AdminController(CourseRepository repository) { this.repository=repository; }
  @GetMapping("/csrf")
- public Map<String,String> csrf(CsrfToken token) {
+ public Map<String,String> csrf(@RequestAttribute("_csrf") CsrfToken token) {
   return Map.of("headerName",token.getHeaderName(),"token",token.getToken());
  }
  @GetMapping("/courses") public List<Course> all(){return repository.findAll();}
