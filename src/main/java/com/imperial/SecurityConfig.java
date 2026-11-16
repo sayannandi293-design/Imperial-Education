@@ -34,6 +34,11 @@ public class SecurityConfig {
      boolean admin=authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
      response.sendRedirect(admin?"/admin.html":"/account.html");
     }).permitAll())
+    .exceptionHandling(e->e
+     .defaultAuthenticationEntryPointFor((request,response,exception)->response.sendError(401),
+       new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**"))
+     .defaultAccessDeniedHandlerFor((request,response,exception)->response.sendError(403),
+       new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**")))
     .logout(l->l.logoutSuccessUrl("/"))
     .build();
  }
