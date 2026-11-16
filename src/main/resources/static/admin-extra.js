@@ -1,9 +1,17 @@
 (async()=>{
- // Obtain a current CSRF token for each write. Do not bypass Spring Security.
+ // Keep CSRF protection enabled; validate the session for every admin write.
  async function getCsrf(){
   const r=await fetch('/api/admin/csrf',{credentials:'same-origin',cache:'no-store',redirect:'manual'});
-  if(!r.ok||r.type==='opaqueredirect')throw Error('Admin session expired. Please sign in again.');
+  if(!r.ok||r.type==='opaqueredirect')throw Error('Admin session expired. Sign in again as Admin.');
   return r.json();
+ }
+ async function currentRole(){
+  try{
+   const r=await fetch('/api/session',{credentials:'same-origin',cache:'no-store'});
+   if(!r.ok)return 'UNKNOWN';
+   const s=await r.json();
+   return s.signedIn?s.role:'GUEST';
+  }catch{return 'UNKNOWN'}
  }
  try{await getCsrf()}catch(e){return}
  async function api(path,method='GET',body){
@@ -13,9 +21,15 @@
    headers[csrf.headerName]=csrf.token;
   }
   if(body)headers['Content-Type']='application/json';
-  const r=await fetch(path,{method,credentials:'same-origin',cache:'no-store',redirect:'manual',headers,body:body?JSON.stringify(body):undefined});
+  const r=await fetch(path,{method,credentials:'same-origin',cache:'no-store',redirect:'manual',
+   headers,body:body?JSON.stringify(body):undefined});
   if(r.type==='opaqueredirect'||r.status===401)throw Error('Admin session expired. Please log in again.');
-  if(r.status===403)throw Error('Access denied (403). Refresh and sign in as admin again, then retry.');
+  if(r.status===403){
+   const role=await currentRole();
+   if(role==='STUDENT')throw Error('This browser is currently logged in as STUDENT. Log out and sign in as Admin. Use a separate private window for Student testing.');
+   if(role==='GUEST')throw Error('Admin session expired. Please sign in as Admin again.');
+   throw Error('HTTP 403 on '+method+' '+path+'. Session role: '+role+'. Please check the matching Render server log; the action was not retried automatically.');
+  }
   if(!r.ok)throw Error('Request failed (HTTP '+r.status+').');
   return r.status===204?null:r.json();
  }
