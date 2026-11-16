@@ -9,6 +9,7 @@ public class Course {
  @Min(0) private long priceInPaise;
  private String imageUrl;
  public Long getId(){return id;}
+ public void setId(Long value){id=value;}
  public String getTitle(){return title;}
  public void setTitle(String x){title=x;}
  public String getDescription(){return description;}
