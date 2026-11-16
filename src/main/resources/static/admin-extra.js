@@ -1,8 +1,21 @@
 (async()=>{
- const csrf=await fetch('/api/admin/csrf').then(r=>r.ok?r.json():null).catch(()=>null);
- if(!csrf)return;
+ // Obtain a current CSRF token for each write. Do not bypass Spring Security.
+ async function getCsrf(){
+  const r=await fetch('/api/admin/csrf',{credentials:'same-origin',cache:'no-store',redirect:'manual'});
+  if(!r.ok||r.type==='opaqueredirect')throw Error('Admin session expired. Please sign in again.');
+  return r.json();
+ }
+ try{await getCsrf()}catch(e){return}
  async function api(path,method='GET',body){
-  const r=await fetch(path,{method,credentials:'same-origin',headers:{[csrf.headerName]:csrf.token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+  const headers={'Accept':'application/json'};
+  if(method!=='GET'){
+   const csrf=await getCsrf();
+   headers[csrf.headerName]=csrf.token;
+  }
+  if(body)headers['Content-Type']='application/json';
+  const r=await fetch(path,{method,credentials:'same-origin',cache:'no-store',redirect:'manual',headers,body:body?JSON.stringify(body):undefined});
+  if(r.type==='opaqueredirect'||r.status===401)throw Error('Admin session expired. Please log in again.');
+  if(r.status===403)throw Error('Access denied (403). Refresh and sign in as admin again, then retry.');
   if(!r.ok)throw Error('Request failed (HTTP '+r.status+').');
   return r.status===204?null:r.json();
  }
