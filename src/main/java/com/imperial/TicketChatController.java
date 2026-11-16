@@ -48,7 +48,7 @@ public class TicketChatController {
   String body=input.body().trim();
   if(body.isEmpty())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Message is required");
   TicketChatMessage result=messages.save(new TicketChatMessage(ticket,admin?"ADMIN":"STUDENT",body));
-  if(admin){ticket.status="RESOLVED";ticket.adminReply=body;}
+  if(admin){ticket.status="RESOLVED";}
   else ticket.status="OPEN";
   tickets.save(ticket);
   return new ChatMessage(String.valueOf(result.getId()),result.getSender(),result.getBody(),result.getCreatedAt());
