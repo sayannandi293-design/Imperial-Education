@@ -44,7 +44,17 @@
     const header=document.createElement('div');header.className='support-chat-header';
     const title=document.createElement('strong');title.textContent='#'+ticket.id+' · '+ticket.subject;
     const small=document.createElement('small');small.textContent='IMPERIAL EDUCATION Support';
-    header.append(title,small);thread.append(header);
+    const remove=document.createElement('button');remove.type='button';remove.className='danger-button support-chat-delete';remove.textContent='Delete Chat';
+    remove.onclick=async()=>{
+     if(!confirm('Permanently delete this ticket and ALL messages for both you and support? This cannot be undone.'))return;
+     remove.disabled=true;
+     try{
+      await api('/api/student/tickets/'+ticket.id,'DELETE');
+      if(chatRefresh){clearInterval(chatRefresh);chatRefresh=null}
+      currentChat=null;await tickets();
+     }catch(e){status.textContent=e.message;remove.disabled=false}
+    };
+    header.append(title,small,remove);thread.append(header);
     const feed=document.createElement('div');feed.className='support-chat-messages';
     feed.setAttribute('aria-live','polite');thread.append(feed);
     const form=document.createElement('form');form.className='support-chat-compose';
