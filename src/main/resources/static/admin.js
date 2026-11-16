@@ -14,6 +14,7 @@ async function init(){
   const logout=document.querySelector('#logout-form');
   const hidden=document.createElement('input');hidden.type='hidden';hidden.name='_csrf';hidden.value=csrf.token;logout.append(hidden);
   await reload();
+  await loadPayments();
  }catch(e){message.textContent=e.message}
 }
 async function reload(){
@@ -56,3 +57,33 @@ form.onsubmit=async e=>{
  try{await request(editingId===null?'/api/admin/courses':'/api/admin/courses/'+editingId,editingId===null?'POST':'PUT',payload);resetForm();message.textContent='Course saved successfully.';await reload()}catch(err){message.textContent=err.message}
 };
 init();
+async function loadPayments(){
+ const container=document.querySelector('#payment-requests');
+ const response=await fetch('/api/admin/payments');
+ if(!response.ok){container.textContent='Unable to load payment requests.';return}
+ const payments=await response.json();container.replaceChildren();
+ if(!payments.length){container.textContent='No UPI payment requests yet.';return}
+ for(const p of payments){
+  const row=document.createElement('div');row.className='payment-row';
+  const name=document.createElement('strong');name.textContent=p.courseTitle+' · ₹'+(p.amountInPaise/100).toFixed(2);
+  const who=document.createElement('p');who.textContent=p.studentName+' ('+p.studentEmail+')';
+  const ref=document.createElement('p');ref.textContent='UTR: '+p.utr+' · Status: '+p.status+' · Submitted: '+new Date(p.createdAt).toLocaleString();
+  row.append(name,who,ref);
+  if(p.status==='PENDING'){
+   const actions=document.createElement('div');actions.className='actions';
+   for(const action of ['approve','reject']){
+    const btn=document.createElement('button');btn.className=action==='approve'?'admin-button':'danger-button';
+    btn.type='button';btn.textContent=action==='approve'?'Approve verified payment':'Reject request';
+    btn.onclick=async()=>{
+     if(!confirm(action==='approve'?'Have you independently verified this UTR, recipient account, exact amount and payment in your bank statement?':'Reject this payment request?'))return;
+     try{
+      await request('/api/admin/payments/'+p.id+'/'+action.toLowerCase(),'POST');
+      document.querySelector('#payment-message').textContent='Payment request '+action+'d.';
+      await loadPayments();
+     }catch(err){document.querySelector('#payment-message').textContent=err.message}
+    };actions.append(btn);
+   }row.append(actions);
+  }
+  container.append(row);
+ }
+}
