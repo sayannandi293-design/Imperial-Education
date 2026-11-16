@@ -40,6 +40,17 @@ public class CommerceController {
   CourseCoupon c=coupons.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
   c.active=!c.active;return cv(coupons.save(c));
  }
+ public record PublicOffer(String code,int percent,int maxUses,int remainingUses){}
+ @GetMapping("/api/offers")
+ public List<PublicOffer> activeOffers(){
+  return coupons.findAll().stream()
+   .filter(c->c.active&&(c.maxUses==0||c.usedCount<c.maxUses))
+   .sorted(Comparator.comparingInt((CourseCoupon c)->c.discountPercent).reversed()
+    .thenComparing(c->c.id))
+   .map(c->new PublicOffer(c.code,c.discountPercent,c.maxUses,
+      c.maxUses==0?-1:Math.max(0,c.maxUses-c.usedCount)))
+   .toList();
+ }
  public record CouponQuote(long amountInPaise,int percent,String code){}
  @GetMapping("/api/student/coupon-quote")
  public CouponQuote quote(@RequestParam Long courseId,@RequestParam String code){
