@@ -18,7 +18,8 @@ public class SecurityConfig {
    }
    StudentAccount a=accounts.findByEmail(username.toLowerCase(java.util.Locale.ROOT))
      .orElseThrow(()->new UsernameNotFoundException("Account not found"));
-   return User.withUsername(a.getEmail()).password(a.getPasswordHash()).roles("STUDENT").build();
+   return User.withUsername(a.getEmail()).password(a.getPasswordHash())
+     .disabled(a.isVerificationRequired()&&!a.isEmailVerified()).roles("STUDENT").build();
   };
  }
  @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
@@ -26,7 +27,7 @@ public class SecurityConfig {
     .csrfTokenRepository(new org.springframework.security.web.csrf.CookieCsrfTokenRepository())
     .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler()))
    .authorizeHttpRequests(a->a
-    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/login","/login.html","/login.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/visit").permitAll()
+    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/login","/login.html","/login.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/api/account/verification/**","/verify-email.html","/verify-email.js","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/visit").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/courses","/api/courses/**").permitAll()
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/admin-sections.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
@@ -42,6 +43,8 @@ public class SecurityConfig {
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**"))
      .defaultAccessDeniedHandlerFor((request,response,exception)->response.sendError(403),
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**")))
+    .sessionManagement(sm->sm.sessionFixation(sf->sf.migrateSession())
+      .maximumSessions(2).maxSessionsPreventsLogin(false))
     .logout(l->l.logoutSuccessUrl("/"))
     .build();
  }
