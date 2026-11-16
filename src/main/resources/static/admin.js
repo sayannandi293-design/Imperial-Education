@@ -14,8 +14,8 @@ async function init(){
   const logout=document.querySelector('#logout-form');
   const hidden=document.createElement('input');hidden.type='hidden';hidden.name='_csrf';hidden.value=csrf.token;logout.append(hidden);
   await reload();
-  populateMaterialCourses();
-  await loadMaterials();
+  populateTelegramCourses();
+  await loadTelegram();
   await loadPayments();
  }catch(e){message.textContent=e.message}
 }
@@ -105,54 +105,42 @@ async function loadPayments(){
  }
 }
 
-function populateMaterialCourses(){
- const select=document.querySelector('#material-course');
- const previous=select.value;
- select.replaceChildren();
+function populateTelegramCourses(){
+ const select=document.querySelector('#telegram-course');
+ const selected=select.value;select.replaceChildren();
  for(const course of courses){
   const option=document.createElement('option');option.value=course.id;option.textContent=course.title;select.append(option);
  }
- if(courses.some(c=>String(c.id)===previous))select.value=previous;
+ if(courses.some(c=>String(c.id)===selected))select.value=selected;
 }
-async function loadMaterials(){
- const select=document.querySelector('#material-course'),list=document.querySelector('#material-list');
- const courseId=select.value;list.replaceChildren();
- if(!courseId){list.textContent='Add a course first.';return}
+async function loadTelegram(){
+ const select=document.querySelector('#telegram-course'),input=document.querySelector('#telegram-url');
+ const status=document.querySelector('#telegram-message');input.value='';status.textContent='';
+ if(!select.value){status.textContent='Create a course first.';return}
  try{
-  const response=await fetch('/api/admin/courses/'+encodeURIComponent(courseId)+'/materials');
-  if(!response.ok)throw Error('Unable to load materials');
-  const materials=await response.json();
-  if(!materials.length){list.textContent='No videos or PDFs added to this course yet.';return}
-  for(const material of materials){
-   const row=document.createElement('div');row.className='payment-row';
-   const label=document.createElement('strong');label.textContent=material.type+' · '+material.title;
-   const link=document.createElement('a');link.href=material.url;link.textContent='Open material';link.target='_blank';link.rel='noopener noreferrer';
-   const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.className='danger-button';
-   remove.addEventListener('click',async()=>{
-    if(!confirm('Remove this material from the course?'))return;
-    try{await request('/api/admin/materials/'+material.id,'DELETE');document.querySelector('#material-message').textContent='Material removed';await loadMaterials();}
-    catch(e){document.querySelector('#material-message').textContent=e.message}
-   });
-   row.append(label,document.createTextNode(' · '),link,document.createTextNode(' '),remove);list.append(row);
-  }
- }catch(e){list.textContent=e.message}
+  const response=await fetch('/api/admin/courses/'+encodeURIComponent(select.value)+'/telegram');
+  if(!response.ok)throw Error('Unable to load group settings.');
+  const result=await response.json();
+  input.value=result.inviteUrl||'';
+  status.textContent=result.inviteUrl?'Telegram group link is configured.':'No Telegram group set for this course.';
+ }catch(e){status.textContent=e.message}
 }
-document.querySelector('#material-course').addEventListener('change',loadMaterials);
-document.querySelector('#material-form').addEventListener('submit',async e=>{
+document.querySelector('#telegram-course').addEventListener('change',loadTelegram);
+document.querySelector('#telegram-form').addEventListener('submit',async e=>{
  e.preventDefault();
- const status=document.querySelector('#material-message');status.textContent='';
- const select=document.querySelector('#material-course');
- if(!select.value){status.textContent='Select a course first';return}
- const payload={
-  title:document.querySelector('#material-title').value.trim(),
-  type:document.querySelector('#material-type').value,
-  url:document.querySelector('#material-url').value.trim()
- };
+ const status=document.querySelector('#telegram-message'),id=document.querySelector('#telegram-course').value;
+ if(!id)return;
  try{
-  await request('/api/admin/courses/'+encodeURIComponent(select.value)+'/materials','POST',payload);
-  document.querySelector('#material-title').value='';
-  document.querySelector('#material-url').value='';
-  status.textContent='Material saved.';
-  await loadMaterials();
- }catch(err){status.textContent=err.message}
+  await request('/api/admin/courses/'+encodeURIComponent(id)+'/telegram','PUT',{inviteUrl:document.querySelector('#telegram-url').value.trim()});
+  status.textContent='Telegram group link saved for this course.';
+ }catch(e){status.textContent=e.message}
+});
+document.querySelector('#remove-telegram').addEventListener('click',async()=>{
+ const id=document.querySelector('#telegram-course').value;
+ if(!id||!confirm('Remove Telegram group link for this course?'))return;
+ try{
+  await request('/api/admin/courses/'+encodeURIComponent(id)+'/telegram','DELETE');
+  document.querySelector('#telegram-url').value='';
+  document.querySelector('#telegram-message').textContent='Telegram group link removed.';
+ }catch(e){document.querySelector('#telegram-message').textContent=e.message}
 });
