@@ -32,7 +32,7 @@ public class SecurityConfig {
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/admin-sections.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
     .requestMatchers("/api/student/**","/checkout.html","/checkout.js").hasRole("STUDENT")
-    .requestMatchers("/account.html","/account.js","/account-extra.js","/account-tabs.js","/api/account/me").hasRole("STUDENT")
+    .requestMatchers("/account.html","/account.js","/account-extra.js","/account-tabs.js","/api/account/me","/invoice.html","/invoice.js").hasRole("STUDENT")
     .anyRequest().denyAll())
     .formLogin(f->f.loginPage("/login.html").loginProcessingUrl("/login").failureUrl("/login.html?error").successHandler((request,response,authentication)->{
      boolean admin=authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
