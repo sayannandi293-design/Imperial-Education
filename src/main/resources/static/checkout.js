@@ -44,6 +44,9 @@ document.querySelector('#payment-form').addEventListener('submit',async e=>{
 });
 init();
 function setPayLink(amount){
+ const qr=document.querySelector('#upi-qr');
+ if(qr){qr.hidden=amount!==course.priceInPaise||!payeeData.qrImageUrl}
+ document.querySelector('#coupon-message').dataset.discount=String(amount!==course.priceInPaise);
  if(!payeeData)return;
  const uri='upi://pay?'+new URLSearchParams({pa:payeeData.upiId,pn:payeeData.payeeName,am:(amount/100).toFixed(2),cu:'INR',tn:'Imperial Education - '+course.title}).toString();
  const link=document.querySelector('#upi-launch');link.href=uri;link.hidden=false;
@@ -60,7 +63,7 @@ document.querySelector('#apply-coupon').addEventListener('click',async()=>{
   if(!response.ok)throw Error('Coupon is invalid or no longer available.');
   const data=await response.json();
   appliedCoupon=data.code;setPayLink(data.amountInPaise);
-  status.textContent=data.percent+'% discount applied. Pay the displayed discounted amount.';
+  status.textContent=data.percent+'% discount applied. Use Open UPI App to pay the displayed exact amount. A static QR code cannot be used for this discounted amount.';
  }catch(e){setPayLink(course.priceInPaise);status.textContent=e.message}
 });
 document.querySelector('#coupon-code').addEventListener('input',()=>{
