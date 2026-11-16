@@ -10,8 +10,9 @@ class CourseCoupon {
  @Column(nullable=false) boolean active=true;
  @Column(nullable=false) int maxUses=0;
  @Column(nullable=false) int usedCount=0;
+ @Column Instant publishedAt;
  protected CourseCoupon(){}
- CourseCoupon(String code,int percent,int max){this.code=code;this.discountPercent=percent;this.maxUses=max;}
+ CourseCoupon(String code,int percent,int max){this.code=code;this.discountPercent=percent;this.maxUses=max;this.publishedAt=Instant.now();}
 }
 
 @Entity @Table(name="site_announcements")
