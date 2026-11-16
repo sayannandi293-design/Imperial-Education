@@ -24,6 +24,13 @@ function showDetails(course){
  const buy=document.createElement('button');buy.type='button';buy.className='admin-button';buy.textContent='Buy Now';buy.addEventListener('click',()=>{window.location.href='/checkout.html?course='+encodeURIComponent(course.id)});
  const note=document.createElement('p');note.className='checkout-note';note.textContent='Pay by UPI and submit the transaction reference. Your course is unlocked only after manual verification.';
  details.append(h,p,price,document.createElement('hr'),buy,note);
+ const reviews=document.createElement('section');
+ const head=document.createElement('h3');head.textContent='Verified Student Reviews';reviews.append(head);
+ const output=document.createElement('div');output.textContent='Loading reviews…';reviews.append(output);details.append(reviews);
+ fetch('/api/courses/'+encodeURIComponent(course.id)+'/reviews').then(r=>r.ok?r.json():[]).then(items=>{
+  output.replaceChildren();if(!items.length){output.textContent='No verified reviews yet.';return}
+  for(const item of items){const p=document.createElement('p');p.textContent='★'.repeat(item.rating)+' — '+item.studentName+': '+item.comment;output.append(p)}
+ }).catch(()=>output.textContent='Reviews are temporarily unavailable.');
  dialog.showModal();
 }
 let availableCourses=[];
@@ -52,7 +59,15 @@ function renderCourses(){
   view.addEventListener('click',()=>showDetails(c));
   const buy=document.createElement('button');buy.className='secondary-button';buy.textContent='Buy Now';
   buy.addEventListener('click',()=>{window.location.href='/checkout.html?course='+encodeURIComponent(c.id)});
-  actions.append(view,buy);card.append(title,price,actions);list.append(card);
+  const save=document.createElement('button');save.className='secondary-button';save.textContent='♡ Save';save.onclick=async()=>{
+   try{
+    const session=await (await fetch('/api/session')).json();
+    if(!session.signedIn||session.role!=='STUDENT'){window.location.href='/login';return}
+    const response=await fetch('/api/student/wishlist/'+encodeURIComponent(c.id),{method:'POST',headers:{[session.csrfHeaderName||'X-CSRF-TOKEN']:session.csrfToken}});
+    if(!response.ok)throw Error();save.textContent='♥ Saved';save.disabled=true;
+   }catch{alert('Could not save. Sign in as a student and retry.')}
+  };
+  actions.append(view,buy,save);card.append(title,price,actions);list.append(card);
  }
 }
 searchInput.addEventListener('input',renderCourses);
@@ -82,3 +97,18 @@ async function updateNavigation(){
  }catch(e){console.warn('Could not update navigation',e)}
 }
 updateNavigation();
+
+async function loadAnnouncements(){
+ try{
+  const r=await fetch('/api/announcements');if(!r.ok)return;
+  const announcements=await r.json();const panel=document.querySelector('#announcements');
+  panel.replaceChildren();
+  for(const a of announcements){const item=document.createElement('div');const h=document.createElement('strong');h.textContent=a.title;const p=document.createElement('p');p.textContent=a.message;item.append(h,p);panel.append(item)}
+  panel.hidden=announcements.length===0;
+ }catch{}
+}
+loadAnnouncements();
+if(!sessionStorage.getItem('ie-view-recorded')){
+ sessionStorage.setItem('ie-view-recorded','1');
+ fetch('/api/visit',{method:'POST'}).catch(()=>{});
+}
