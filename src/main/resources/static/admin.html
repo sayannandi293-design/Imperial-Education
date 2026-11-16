@@ -9,13 +9,12 @@
 <div class="actions"><button class="admin-button" type="submit" id="save-btn">Save Course</button><button class="secondary-button" type="button" id="cancel-btn" hidden>Cancel Edit</button></div></form>
 <p id="form-message" role="status" aria-live="polite"></p></section>
 <section class="admin-panel"><h2>Available courses</h2><div id="admin-courses">Loading courses…</div></section>
-<section class="admin-panel"><h2>Course Video & PDF Materials</h2>
-<p>Add links for your course videos and PDF notes. Only students whose course payment you approve can see these links inside My Courses. External URLs can still be shared; use private storage with signed access before selling confidential materials.</p>
-<form id="material-form">
-<label>Course<select id="material-course" required></select></label>
-<label>Material title<input id="material-title" maxlength="150" required placeholder="Lesson 1 / Notes PDF"></label>
-<label>Type<select id="material-type"><option value="VIDEO">Video</option><option value="PDF">PDF</option></select></label>
-<label>HTTPS video or PDF URL<input id="material-url" type="url" required maxlength="2048" placeholder="https://..."></label>
-<button class="admin-button" type="submit">Add material</button>
-</form><p id="material-message" role="status"></p><div id="material-list"></div></section>
+<section class="admin-panel"><h2>Course Telegram Groups</h2>
+<p>Save a private Telegram group invite link for each course. After you verify a student's UPI payment and approve it, the student will see a Join Telegram Group button in My Courses.</p>
+<form id="telegram-form">
+<label>Course<select id="telegram-course" required></select></label>
+<label>Private Telegram Invite Link<input type="url" id="telegram-url" required placeholder="https://t.me/+..." maxlength="512"></label>
+<div class="actions"><button class="admin-button" type="submit">Save Telegram Group</button><button class="danger-button" type="button" id="remove-telegram">Remove Link</button></div>
+</form><p id="telegram-message" role="status"></p><p class="warning-note">Use a private group with join requests enabled. Students can forward invite links, so approve Telegram join requests separately. A website payment approval does not automatically add anyone to Telegram.</p>
+</section>
 <section class="admin-panel" style="margin:24px auto;max-width:1000px"><h2>Manual UPI Payment Requests</h2><p>Before approving, verify the exact received amount and UTR in your own bank/UPI transaction history. A screenshot or UTR alone does not prove payment.</p><p id="payment-message" role="status"></p><div id="payment-requests">Loading requests…</div></section></main><script src="/admin.js"></script></body></html>
