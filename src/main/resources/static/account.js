@@ -12,6 +12,15 @@ async function init(){
   const courses=await cr.json(),payments=await pr.json();
   const mine=document.querySelector('#my-courses'),pending=document.querySelector('#my-payments');
   mine.replaceChildren();pending.replaceChildren();
+  const notifications=document.querySelector('#payment-notifications');notifications.replaceChildren();
+  const recent=payments.filter(p=>p.status==='APPROVED'||p.status==='REJECTED');
+  if(!recent.length)notifications.textContent='No new payment decisions. Pending requests appear below.';
+  for(const payment of recent.slice(0,5)){
+   const alert=document.createElement('div');alert.className='notice-row';
+   alert.textContent=(payment.status==='APPROVED'?'✅ Approved: ':'❌ Rejected: ')+payment.courseTitle+
+    (payment.status==='APPROVED'?' — Your course access is now available.':' — Contact support if you need assistance.');
+   notifications.append(alert);
+  }
   if(!courses.length)mine.textContent='No approved courses yet. Explore courses to get started.';
   for(const c of courses){
    const row=document.createElement('div');row.className='payment-row';
