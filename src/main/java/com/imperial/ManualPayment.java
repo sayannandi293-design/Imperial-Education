@@ -13,10 +13,13 @@ public class ManualPayment {
  @Enumerated(EnumType.STRING) @Column(nullable=false,length=16) private Status status=Status.PENDING;
  @Column(nullable=false) private Instant createdAt=Instant.now();
  private Instant reviewedAt;
+ @Column(length=40) private String couponCode;
  protected ManualPayment(){}
  public ManualPayment(StudentAccount student,Course course,long amountInPaise,String utr){
   this.student=student;this.course=course;this.amountInPaise=amountInPaise;this.utr=utr;
  }
+ public void setCouponCode(String code){this.couponCode=code;}
+ public String getCouponCode(){return couponCode;}
  public Long getId(){return id;}
  public StudentAccount getStudent(){return student;}
  public Course getCourse(){return course;}
