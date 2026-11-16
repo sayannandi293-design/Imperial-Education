@@ -50,7 +50,7 @@ public class NotificationCenterController {
     if(c.active && (c.maxUses==0||c.usedCount<c.maxUses) && c.publishedAt!=null){
      events.add(new Notice("offer-"+c.id,"New course offer: "+c.discountPercent+"% OFF",
       "Use coupon "+c.code+" at checkout to get "+c.discountPercent+"% discount on eligible courses.",
-      "OFFER","/account.html#notifications",c.publishedAt,false));
+      "OFFER","/#courses",c.publishedAt,false));
     }
    }
    for(ManualPayment pay:payments.findByStudent_IdOrderByCreatedAtDesc(id)){
