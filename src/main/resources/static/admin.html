@@ -9,4 +9,13 @@
 <div class="actions"><button class="admin-button" type="submit" id="save-btn">Save Course</button><button class="secondary-button" type="button" id="cancel-btn" hidden>Cancel Edit</button></div></form>
 <p id="form-message" role="status" aria-live="polite"></p></section>
 <section class="admin-panel"><h2>Available courses</h2><div id="admin-courses">Loading courses…</div></section>
+<section class="admin-panel"><h2>Course Video & PDF Materials</h2>
+<p>Add links for your course videos and PDF notes. Only students whose course payment you approve can see these links inside My Courses. External URLs can still be shared; use private storage with signed access before selling confidential materials.</p>
+<form id="material-form">
+<label>Course<select id="material-course" required></select></label>
+<label>Material title<input id="material-title" maxlength="150" required placeholder="Lesson 1 / Notes PDF"></label>
+<label>Type<select id="material-type"><option value="VIDEO">Video</option><option value="PDF">PDF</option></select></label>
+<label>HTTPS video or PDF URL<input id="material-url" type="url" required maxlength="2048" placeholder="https://..."></label>
+<button class="admin-button" type="submit">Add material</button>
+</form><p id="material-message" role="status"></p><div id="material-list"></div></section>
 <section class="admin-panel" style="margin:24px auto;max-width:1000px"><h2>Manual UPI Payment Requests</h2><p>Before approving, verify the exact received amount and UTR in your own bank/UPI transaction history. A screenshot or UTR alone does not prove payment.</p><p id="payment-message" role="status"></p><div id="payment-requests">Loading requests…</div></section></main><script src="/admin.js"></script></body></html>
