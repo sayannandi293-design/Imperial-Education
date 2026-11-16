@@ -25,4 +25,7 @@ interface SupportTicketRepository extends JpaRepository<SupportTicket,Long> {
 }
 interface VisitorDailyCountRepository extends JpaRepository<VisitorDailyCount,Long> {
  Optional<VisitorDailyCount> findByDay(String day);
+ @org.springframework.data.jpa.repository.Modifying
+ @org.springframework.data.jpa.repository.Query(value="INSERT INTO visitor_daily_counts (day, views) VALUES (:day, 1) ON CONFLICT (day) DO UPDATE SET views = visitor_daily_counts.views + 1",nativeQuery=true)
+ void incrementOrInsert(@org.springframework.data.repository.query.Param("day") String day);
 }
