@@ -40,3 +40,20 @@ fetch('/api/courses').then(async r=>{if(!r.ok)throw Error('Unable to load course
  actions.append(view,buy);card.append(title,price,actions);list.append(card);
  }
 }).catch(()=>list.textContent='Courses are temporarily unavailable.');
+
+async function updateNavigation(){
+ try{
+  const response=await fetch('/api/session',{credentials:'same-origin',cache:'no-store'});
+  if(!response.ok)return;
+  const session=await response.json();
+  if(!session.signedIn)return;
+  document.querySelectorAll('[data-guest-nav]').forEach(element=>element.hidden=true);
+  if(session.role==='STUDENT')document.querySelector('[data-student-nav]').hidden=false;
+  if(session.role==='ADMIN')document.querySelector('[data-admin-nav]').hidden=false;
+  const logout=document.querySelector('#home-logout');
+  const csrf=document.createElement('input');
+  csrf.type='hidden';csrf.name='_csrf';csrf.value=session.csrfToken;
+  logout.append(csrf);logout.hidden=false;
+ }catch(e){console.warn('Could not update navigation',e)}
+}
+updateNavigation();
