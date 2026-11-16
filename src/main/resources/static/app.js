@@ -110,5 +110,5 @@ async function loadAnnouncements(){
 loadAnnouncements();
 if(!sessionStorage.getItem('ie-view-recorded')){
  sessionStorage.setItem('ie-view-recorded','1');
- fetch('/api/visit',{method:'POST'}).catch(()=>{});
+ fetch('/api/visit',{method:'GET'}).catch(()=>{});
 }
