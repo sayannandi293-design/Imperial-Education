@@ -86,3 +86,10 @@
 .notification-item small{color:#6c7d91}.notification-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .notification-actions a{font-weight:700;color:#1f5794;text-decoration:none}.notification-actions button{padding:6px 10px;font-size:12px}
 .notification-status{color:#b42318;font-size:13px;min-height:18px}
+
+/* Course offers: coupon pricing is conditional, original price remains clear */
+.course-offer{display:grid;gap:5px;margin:7px 0 13px;padding:10px 12px;border:1px solid #b5e4ce;border-radius:9px;background:#f0fbf5;color:#155b3a}
+.course-offer-price{font-weight:800;font-size:17px}
+.course-offer-code{font-weight:750;font-size:14px;color:#206443}
+.course-offer small{font-size:12px;color:#476857}
+.course-card>.price{margin-top:8px}
