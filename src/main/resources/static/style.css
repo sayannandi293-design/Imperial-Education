@@ -69,3 +69,8 @@
 .admin-topic>.admin-panel{width:100%;max-width:unset!important;margin:0!important;box-shadow:none!important;border:0!important;border-top:1px solid #e2e8f0!important;border-radius:0!important}
 .admin-topic-inner-title{font-size:17px;margin-top:0}
 @media(max-width:600px){.admin-topic-title{padding:16px;font-size:16px}}
+
+/* Email login and accessible password visibility control */
+.login-panel{max-width:550px;margin:0 auto}.login-panel h1{font-size:34px;margin:12px 0}.login-panel p{line-height:1.6;color:#526079}
+.login-panel #login-form>label{display:block;margin:17px 0 7px;font-weight:700}.login-panel #login-form>input{display:block;width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.password-visible{display:flex;gap:8px;align-items:center}.password-visible input{flex:1;min-width:0;padding:13px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.password-visible button{flex-shrink:0}.login-submit{width:100%;margin-top:22px}.login-note{font-size:13px}.login-message:not(:empty){background:#ffedd5;padding:10px;border-radius:8px;color:#92400e!important}
