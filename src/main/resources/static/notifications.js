@@ -58,8 +58,10 @@
     if(destination){
      const link=document.createElement('a');link.href=destination;
      link.textContent=n.category==='SUPPORT'?'Open Support Chat':n.category==='PAYMENT'?'View Payment / Course':'Open Details';
-     link.addEventListener('click',async()=>{
-      if(!n.read){try{await markRead(n.id)}catch{}}
+     link.addEventListener('click',async e=>{
+      e.preventDefault();
+      if(!n.read){try{await markRead(n.id)}catch(error){status.textContent=error.message}}
+      window.location.assign(destination);
      });actions.append(link);
     }
     if(!n.read){
