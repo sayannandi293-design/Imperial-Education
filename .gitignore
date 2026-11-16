@@ -3,3 +3,10 @@ target/
 .idea/
 .vscode/
 *.iml
+.env.*
+!.env.example
+private-backups/
+*.sql
+*.sql.gz
+*.sql.gz.age
+*.dump
