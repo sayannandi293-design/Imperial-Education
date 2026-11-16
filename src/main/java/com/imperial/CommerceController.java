@@ -112,7 +112,7 @@ public class CommerceController {
  public record TicketInput(@NotBlank @Size(max=150) String subject,@NotBlank @Size(max=3000) String message){}
  public record TicketView(Long id,String subject,String message,String status,String adminReply,String studentEmail,String createdAt){}
  private TicketView tv(SupportTicket t){return new TicketView(t.id,t.subject,t.message,t.status,t.adminReply,t.student.getEmail(),t.createdAt.toString());}
- @PostMapping("/api/student/tickets") @ResponseStatus(HttpStatus.CREATED)
+ @PostMapping("/api/student/tickets") @ResponseStatus(HttpStatus.CREATED) @Transactional
  public TicketView submitTicket(Principal p,@Valid @RequestBody TicketInput input){
   return tv(tickets.save(new SupportTicket(user(p),input.subject().trim(),input.message().trim())));
  }
@@ -121,7 +121,7 @@ public class CommerceController {
  @GetMapping("/api/admin/tickets") @Transactional(readOnly=true)
  public List<TicketView> adminTickets(){return tickets.findAllByOrderByCreatedAtDesc().stream().map(this::tv).toList();}
  public record TicketReply(@NotBlank @Size(max=3000) String reply){}
- @PostMapping("/api/admin/tickets/{id}/reply") public TicketView reply(@PathVariable Long id,@Valid @RequestBody TicketReply input){
+ @PostMapping("/api/admin/tickets/{id}/reply") @Transactional public TicketView reply(@PathVariable Long id,@Valid @RequestBody TicketReply input){
   SupportTicket t=tickets.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
   t.adminReply=input.reply().trim();t.status="RESOLVED";return tv(tickets.save(t));
  }
