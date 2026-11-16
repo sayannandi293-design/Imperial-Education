@@ -110,8 +110,8 @@ public class CommerceController {
   r.published=!r.published;reviews.save(r);return Map.of("published",r.published);
  }
  public record TicketInput(@NotBlank @Size(max=150) String subject,@NotBlank @Size(max=3000) String message){}
- public record TicketView(Long id,String subject,String message,String status,String adminReply,String studentEmail,String createdAt){}
- private TicketView tv(SupportTicket t){return new TicketView(t.id,t.subject,t.message,t.status,t.adminReply,t.student.getEmail(),t.createdAt.toString());}
+ public record TicketView(Long id,String subject,String message,String status,String adminReply,String studentEmail,String studentName,String createdAt){}
+ private TicketView tv(SupportTicket t){return new TicketView(t.id,t.subject,t.message,t.status,t.adminReply,t.student.getEmail(),t.student.getFullName(),t.createdAt.toString());}
  @PostMapping("/api/student/tickets") @ResponseStatus(HttpStatus.CREATED) @Transactional
  public TicketView submitTicket(Principal p,@Valid @RequestBody TicketInput input){
   return tv(tickets.save(new SupportTicket(user(p),input.subject().trim(),input.message().trim())));
