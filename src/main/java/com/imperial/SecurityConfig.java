@@ -28,7 +28,7 @@ public class SecurityConfig {
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
     .requestMatchers("/api/student/**","/checkout.html","/checkout.js").hasRole("STUDENT")
-    .requestMatchers("/account.html","/account.js","/account-extra.js","/api/account/me").hasRole("STUDENT")
+    .requestMatchers("/account.html","/account.js","/account-extra.js","/account-tabs.js","/api/account/me").hasRole("STUDENT")
     .anyRequest().denyAll())
     .formLogin(f->f.successHandler((request,response,authentication)->{
      boolean admin=authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
