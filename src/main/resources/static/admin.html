@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin | IMPERIAL EDUCATION</title><link rel="stylesheet" href="/style.css"></head>
+<body><header class="bar"><a class="logo" href="/">✦ IMPERIAL <span>EDUCATION</span></a><nav><a href="/">View website</a><form method="post" action="/logout" id="logout-form"><button type="submit" class="nav-button">Log out</button></form></nav></header>
+<main class="admin-container"><div class="eyebrow">ADMIN PANEL</div><h1>Manage Courses</h1><p>Create, edit, and remove courses offered on your website.</p>
+<section class="admin-panel"><h2 id="form-heading">Add a new course</h2><form id="course-form">
+<label>Course title<input id="course-title" maxlength="255" required placeholder="e.g. Full Stack Web Development"></label>
+<label>Description<textarea id="course-description" rows="4" maxlength="3000" placeholder="What will students learn?"></textarea></label>
+<label>Price in INR<input id="course-price" type="number" min="0" max="10000000" step="0.01" required placeholder="999.00"></label>
+<label>Image URL (optional)<input id="course-image" type="url" placeholder="https://example.com/course.jpg"></label>
+<div class="actions"><button class="admin-button" type="submit" id="save-btn">Save Course</button><button class="secondary-button" type="button" id="cancel-btn" hidden>Cancel Edit</button></div></form>
+<p id="form-message" role="status" aria-live="polite"></p></section>
+<section class="admin-panel"><h2>Available courses</h2><div id="admin-courses">Loading courses…</div></section>
+</main><script src="/admin.js"></script></body></html>
