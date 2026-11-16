@@ -35,6 +35,6 @@ public class InvoiceController {
   return new InvoiceView("IE-"+p.getId(),sellerName,sellerAddress,sellerEmail,
    current.getFullName(),current.getEmail(),p.getCourse().getTitle(),
    p.getAmountInPaise(),p.getUtr(),p.getCreatedAt(),p.getReviewedAt(),
-   "Payment record only. Not a GST tax invoice. No GST charged or represented.");
+   "Payment record only. Not a GST tax invoice. Check seller tax and statutory invoice requirements.");
  }
 }
