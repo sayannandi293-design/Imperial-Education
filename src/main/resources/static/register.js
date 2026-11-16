@@ -1,27 +1,46 @@
 const form=document.querySelector('#register-form');
 const status=document.querySelector('#register-message');
 const button=document.querySelector('#register-button');
-let csrf;
+
 async function loadToken(){
- const r=await fetch('/api/account/csrf',{credentials:'same-origin'});
- if(!r.ok)throw Error('Unable to start registration.');
- csrf=await r.json();
+ const r=await fetch('/api/account/csrf',{credentials:'same-origin',cache:'no-store'});
+ if(!r.ok)throw Error('Unable to initialize registration security (HTTP '+r.status+').');
+ return await r.json();
 }
-loadToken().catch(e=>status.textContent=e.message);
+
 form.addEventListener('submit',async e=>{
- e.preventDefault();status.textContent='';
- if(!csrf){status.textContent='Please refresh the page and try again.';return;}
+ e.preventDefault();
+ status.textContent='';
  button.disabled=true;
  try{
-  const r=await fetch('/api/account/register',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',[csrf.headerName]:csrf.token},body:JSON.stringify({
-   fullName:document.querySelector('#full-name').value.trim(),email:document.querySelector('#email').value.trim(),password:document.querySelector('#password').value
-  })});
-  if(r.status===503){status.textContent='Email service is unavailable. Registration cannot be completed until the administrator configures SMTP. If the account was created, use Resend Verification.';return;}
-  if(r.status===409){status.textContent='This email is already registered. Please sign in.';return;}
-  if(!r.ok){status.textContent='Could not create account. Check your name, email and password.';return;}
-  form.reset();status.replaceChildren();
-  const p=document.createElement('p');p.textContent='Account created. Check your email and verify it before signing in.';
-  const a=document.createElement('a');a.href='/login';a.textContent='Go to Sign In';status.append(p,a);
- }catch{status.textContent='Network error. Please try again.'}
- finally{button.disabled=false}
+  const csrf=await loadToken();
+  const r=await fetch('/api/account/register',{
+   method:'POST',credentials:'same-origin',cache:'no-store',
+   headers:{'Content-Type':'application/json',[csrf.headerName]:csrf.token},
+   body:JSON.stringify({
+    fullName:document.querySelector('#full-name').value.trim(),
+    email:document.querySelector('#email').value.trim(),
+    password:document.querySelector('#password').value
+   })
+  });
+  if(r.ok){
+   form.reset();status.replaceChildren();
+   const p=document.createElement('p');p.textContent='Account created! Check your email for the verification link before signing in.';
+   const a=document.createElement('a');a.href='/login';a.textContent='Go to Sign In';
+   status.append(p,a);return;
+  }
+  // Do not display raw server exception details or disclose sensitive information.
+  const messages={
+   400:'Please check your name, email format and password. The password must be 12–72 characters.',
+   401:'Your session expired. Refresh the page and try again.',
+   403:'Security check failed (HTTP 403). Refresh the page, then retry. If this continues, contact support with the HTTP code.',
+   409:'This email address is already registered. Please use Sign In or Forgot Password.',
+   429:'Too many attempts. Try again later.',
+   503:'Email verification is not available (HTTP 503). The administrator must configure SMTP email delivery. If you already created an account, try Resend Verification.',
+   500:'Server error (HTTP 500). The administrator should check Render logs at the time of this request.'
+  };
+  status.textContent=messages[r.status]||'Registration failed (HTTP '+r.status+'). Contact support with this status code.';
+ }catch(err){
+  status.textContent='Unable to complete registration: '+(err instanceof Error?err.message:'Network error');
+ }finally{button.disabled=false}
 });
