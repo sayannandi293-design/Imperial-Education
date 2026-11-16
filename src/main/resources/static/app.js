@@ -15,15 +15,36 @@ function imageFor(course){
  img.addEventListener('error',()=>img.replaceWith(Object.assign(document.createElement('div'),{className:'image-placeholder',textContent:'Course image unavailable'})));
  return img;
 }
+let activeOffers=[];
+function mainOffer(){return activeOffers.length?activeOffers[0]:null}
+function courseCheckoutUrl(course){
+ const offer=mainOffer();
+ const url='/checkout.html?course='+encodeURIComponent(course.id);
+ return offer?url+'&coupon='+encodeURIComponent(offer.code):url;
+}
+function offerPanel(course){
+ const offer=mainOffer();if(!offer)return null;
+ const box=document.createElement('div');box.className='course-offer';
+ const adjusted=course.priceInPaise*(100-offer.percent)/100;
+ const offerPrice=document.createElement('strong');offerPrice.className='course-offer-price';
+ offerPrice.textContent='With coupon: ₹'+(adjusted/100).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const coupon=document.createElement('div');coupon.className='course-offer-code';
+ coupon.textContent=offer.percent+'% OFF · Code: '+offer.code;
+ const info=document.createElement('small');info.textContent='Apply coupon at checkout. Subject to availability.';
+ box.append(offerPrice,coupon,info);
+ return box;
+}
 function showDetails(course){
  details.replaceChildren();
  const img=imageFor(course);if(img)details.append(img);
  const h=document.createElement('h3');h.textContent=course.title;
  const p=document.createElement('p');p.textContent=course.description||'No description available yet.';
  const price=document.createElement('strong');price.className='price';price.textContent='₹'+(course.priceInPaise/100).toLocaleString('en-IN',{minimumFractionDigits:2});
- const buy=document.createElement('button');buy.type='button';buy.className='admin-button';buy.textContent='Buy Now';buy.addEventListener('click',()=>{window.location.href='/checkout.html?course='+encodeURIComponent(course.id)});
+ const buy=document.createElement('button');buy.type='button';buy.className='admin-button';buy.textContent='Buy Now';buy.addEventListener('click',()=>{window.location.href=courseCheckoutUrl(course)});
  const note=document.createElement('p');note.className='checkout-note';note.textContent='Pay by UPI and submit the transaction reference. Your course is unlocked only after manual verification.';
- details.append(h,p,price,document.createElement('hr'),buy,note);
+ details.append(h,p,price);
+ const offer=offerPanel(course);if(offer)details.append(offer);
+ details.append(document.createElement('hr'),buy,note);
  const reviews=document.createElement('section');
  const head=document.createElement('h3');head.textContent='Verified Student Reviews';reviews.append(head);
  const output=document.createElement('div');output.textContent='Loading reviews…';reviews.append(output);details.append(reviews);
@@ -67,9 +88,22 @@ function renderCourses(){
     if(!response.ok)throw Error();save.textContent='♥ Saved';save.disabled=true;
    }catch{alert('Could not save. Sign in as a student and retry.')}
   };
-  actions.append(view,buy,save);card.append(title,price,actions);list.append(card);
+  actions.append(view,buy,save);
+  card.append(title,price);
+  const offer=offerPanel(c);if(offer)card.append(offer);
+  card.append(actions);list.append(card);
  }
 }
+async function loadOffers(){
+ try{
+  const response=await fetch('/api/offers',{cache:'no-store'});
+  if(!response.ok)return;
+  const offers=await response.json();
+  activeOffers=Array.isArray(offers)?offers:[];
+  if(availableCourses.length)renderCourses();
+ }catch{ /* Courses should still display normally if offers cannot be loaded. */ }
+}
+loadOffers();
 searchInput.addEventListener('input',renderCourses);
 categorySelect.addEventListener('change',renderCourses);
 fetch('/api/courses').then(async r=>{if(!r.ok)throw Error('Unable to load courses');return r.json()}).then(courses=>{
