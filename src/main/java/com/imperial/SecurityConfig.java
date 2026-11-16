@@ -29,6 +29,7 @@ public class SecurityConfig {
    .authorizeHttpRequests(a->a
     .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/login","/login.html","/login.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/api/account/verification/**","/verify-email.html","/verify-email.js","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/visit").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/courses","/api/courses/**").permitAll()
+    .requestMatchers("/notifications.js").authenticated()
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/admin-sections.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
     .requestMatchers("/api/student/**","/checkout.html","/checkout.js").hasRole("STUDENT")
