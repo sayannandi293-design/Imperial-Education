@@ -25,7 +25,7 @@ function courseCheckoutUrl(course){
 function offerPanel(course){
  const offer=mainOffer();if(!offer)return null;
  const box=document.createElement('div');box.className='course-offer';
- const adjusted=course.priceInPaise*(100-offer.percent)/100;
+ const adjusted=Math.floor(course.priceInPaise*(100-offer.percent)/100);
  const offerPrice=document.createElement('strong');offerPrice.className='course-offer-price';
  offerPrice.textContent='With coupon: ₹'+(adjusted/100).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
  const coupon=document.createElement('div');coupon.className='course-offer-code';
