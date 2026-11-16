@@ -16,8 +16,21 @@ async function init(){
   for(const c of courses){
    const row=document.createElement('div');row.className='payment-row';
    const title=document.createElement('strong');title.textContent=c.title;
-   const note=document.createElement('p');note.textContent='Enrollment approved · Course materials are not uploaded yet.';
-   row.append(title,note);mine.append(row);
+   const note=document.createElement('p');note.textContent='Enrollment approved.';
+   const materialsBox=document.createElement('div');materialsBox.textContent='Loading lessons…';
+   row.append(title,note,materialsBox);mine.append(row);
+   try{
+    const response=await fetch('/api/student/courses/'+encodeURIComponent(c.courseId)+'/materials');
+    if(!response.ok)throw Error('Could not load course materials');
+    const materials=await response.json();materialsBox.replaceChildren();
+    if(!materials.length){materialsBox.textContent='Lessons and notes have not been added yet.';continue}
+    for(const m of materials){
+     const line=document.createElement('p');const link=document.createElement('a');
+     link.href=m.url;link.target='_blank';link.rel='noopener noreferrer';
+     link.textContent=(m.type==='PDF'?'📄 PDF: ':'🎬 Video: ')+m.title;
+     line.append(link);materialsBox.append(line);
+    }
+   }catch(e){materialsBox.textContent=e.message}
   }
   if(!payments.length)pending.textContent='No payment requests yet.';
   for(const payment of payments){
