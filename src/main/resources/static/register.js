@@ -16,10 +16,11 @@ form.addEventListener('submit',async e=>{
   const r=await fetch('/api/account/register',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',[csrf.headerName]:csrf.token},body:JSON.stringify({
    fullName:document.querySelector('#full-name').value.trim(),email:document.querySelector('#email').value.trim(),password:document.querySelector('#password').value
   })});
+  if(r.status===503){status.textContent='Email service is unavailable. Registration cannot be completed until the administrator configures SMTP. If the account was created, use Resend Verification.';return;}
   if(r.status===409){status.textContent='This email is already registered. Please sign in.';return;}
   if(!r.ok){status.textContent='Could not create account. Check your name, email and password.';return;}
   form.reset();status.replaceChildren();
-  const p=document.createElement('p');p.textContent='Account created successfully! You can now sign in.';
+  const p=document.createElement('p');p.textContent='Account created. Check your email and verify it before signing in.';
   const a=document.createElement('a');a.href='/login';a.textContent='Go to Sign In';status.append(p,a);
  }catch{status.textContent='Network error. Please try again.'}
  finally{button.disabled=false}
