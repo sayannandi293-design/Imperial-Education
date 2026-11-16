@@ -23,7 +23,7 @@ public class SecurityConfig {
  }
  @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
   return http.authorizeHttpRequests(a->a
-    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/actuator/health","/api/account/register","/api/account/csrf").permitAll()
+    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/actuator/health","/api/account/register","/api/account/csrf","/api/session").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/courses","/api/courses/**").permitAll()
     .requestMatchers("/admin.html","/admin.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
