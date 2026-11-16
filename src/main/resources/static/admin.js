@@ -45,10 +45,20 @@ function render(){
  }
 }
 async function request(url,method,data){
- if(!csrf)throw Error('Security token unavailable. Please refresh and sign in as admin.');
- const response=await fetch(url,{method,credentials:'same-origin',redirect:'manual',headers:{'Accept':'application/json',[csrf.headerName]:csrf.token,...(data?{'Content-Type':'application/json'}:{})},body:data?JSON.stringify(data):undefined});
- if(response.type==='opaqueredirect'||response.status===401||response.status===403){
-  throw Error('Admin session expired or access denied. Open /login, sign in again, then check Available courses before retrying.');
+ // Read a fresh CSRF value before EVERY state-changing request. A cached login-time
+ // token can become stale after session renewal and otherwise causes HTTP 403.
+ const tokenResponse=await fetch('/api/admin/csrf',{method:'GET',credentials:'same-origin',cache:'no-store',redirect:'manual'});
+ if(tokenResponse.type==='opaqueredirect'||!tokenResponse.ok)
+  throw Error('Admin session check failed (HTTP '+tokenResponse.status+'). Sign in again as Admin.');
+ const token=await tokenResponse.json();
+ if(!token.headerName||!token.token)throw Error('CSRF token unavailable. Refresh the page.');
+ const response=await fetch(url,{method,credentials:'same-origin',cache:'no-store',redirect:'manual',headers:{'Accept':'application/json',[token.headerName]:token.token,...(data?{'Content-Type':'application/json'}:{})},body:data?JSON.stringify(data):undefined});
+ if(response.type==='opaqueredirect'||response.status===401)
+  throw Error('Admin session expired. Sign in again as Admin.');
+ if(response.status===403){
+  let role='UNKNOWN';
+  try{const status=await fetch('/api/session',{credentials:'same-origin',cache:'no-store'});if(status.ok){const data=await status.json();role=data.signedIn?data.role:'GUEST'}}catch{}
+  throw Error('HTTP 403 on '+method+' '+url+'. Current role: '+role+'. No automatic retry was made. Check Render logs for CSRF/security denial.');
  }
  if(!response.ok){
   const contentType=response.headers.get('content-type')||'';
@@ -97,9 +107,12 @@ async function loadPayments(){
      if(!confirm(action==='approve'?'Have you independently verified this UTR, recipient account, exact amount and payment in your bank statement?':'Reject this payment request?'))return;
      try{
       await request('/api/admin/payments/'+p.id+'/'+action.toLowerCase(),'POST');
-      document.querySelector('#payment-message').textContent='Payment request '+action+'d.';
+      document.querySelector('#payment-message').textContent='Payment request '+(action==='approve'?'approved':'rejected')+'.';
       await loadPayments();
-     }catch(err){document.querySelector('#payment-message').textContent=err.message}
+     }catch(err){
+      document.querySelector('#payment-message').textContent=err.message+' The payment was not retried. Check its latest status before taking another action.';
+      try{await loadPayments()}catch{}
+     }
     };actions.append(btn);
    }row.append(actions);
   }
