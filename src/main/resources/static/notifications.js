@@ -27,6 +27,14 @@
   });
   if(!r.ok)throw Error(r.status===403?'Access denied; please refresh and sign in again.':'Could not mark this notification as read.');
  }
+ async function deleteNotification(id){
+  const t=await csrfToken();
+  const r=await fetch(base+'/'+encodeURIComponent(id),{
+   method:'DELETE',credentials:'same-origin',cache:'no-store',
+   headers:{[t.headerName]:t.token}
+  });
+  if(!r.ok)throw Error('Could not delete notification (HTTP '+r.status+').');
+ }
  function safeTarget(value){
   if(typeof value!=='string')return null;
   try{
@@ -74,6 +82,19 @@
       catch(e){status.textContent=e.message;button.disabled=false}
      });actions.append(button);
     }
+    const remove=document.createElement('button');remove.type='button';remove.className='danger-button notification-delete';
+    remove.textContent='Delete';remove.setAttribute('aria-label','Delete notification: '+n.title);
+    remove.onclick=async()=>{
+     if(!confirm('Remove this notification from your list? Payment, offers and support data will not be deleted.'))return;
+     remove.disabled=true;status.textContent='';
+     try{
+      await deleteNotification(n.id);
+      // Dismiss immediately, then reload count and list from the server.
+      article.remove();
+      await load(true);
+     }catch(e){status.textContent=e.message;remove.disabled=false}
+    };
+    actions.append(remove);
     article.append(h,p,time,actions);items.append(article);
    }
    if(previouslySelected)items.querySelectorAll('button').forEach(button=>{if(button.dataset.notificationId===previouslySelected)button.focus()});
