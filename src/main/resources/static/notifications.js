@@ -8,7 +8,7 @@
  const status=document.createElement('p');status.className='notification-status';status.setAttribute('role','status');
  const bar=document.createElement('div');bar.className='notification-bar';
  const summary=document.createElement('span');
- const refresh=document.createElement('button');refresh.type='button';refresh.className='secondary-button';refresh.textContent='Refresh';
+ const refresh=document.createElement('button');refresh.type='button';refresh.className='secondary-button refresh-button';refresh.innerHTML='<span class="refresh-icon" aria-hidden="true">↻</span><span>Refresh</span>';
  const items=document.createElement('div');items.className='notification-list';
  bar.append(summary,refresh);
  panel.replaceChildren(bar,items,status);
@@ -37,6 +37,7 @@
  async function load(showErrors=false){
   if(busy)return;
   busy=true;
+  refresh.disabled=true;refresh.classList.add('is-refreshing');refresh.setAttribute('aria-busy','true');
   try{
    const response=await fetch(base,{credentials:'same-origin',cache:'no-store'});
    if(!response.ok)throw Error('Unable to load notifications. Sign in again.');
@@ -78,7 +79,7 @@
    if(previouslySelected)items.querySelectorAll('button').forEach(button=>{if(button.dataset.notificationId===previouslySelected)button.focus()});
    status.textContent='';
   }catch(e){if(showErrors||!items.childElementCount)status.textContent=e.message}
-  finally{busy=false}
+  finally{busy=false;refresh.disabled=false;refresh.classList.remove('is-refreshing');refresh.removeAttribute('aria-busy')}
  }
  refresh.onclick=()=>load(true);
  load(true);
