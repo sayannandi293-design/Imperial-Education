@@ -86,10 +86,17 @@ form.onsubmit=async e=>{
  try{await request(editingId===null?'/api/admin/courses':'/api/admin/courses/'+editingId,editingId===null?'POST':'PUT',payload);resetForm();message.textContent='Course saved successfully.';await reload()}catch(err){message.textContent=err.message}
 };
 init();
+let paymentLoading=false;
 async function loadPayments(){
+ if(paymentLoading)return;
+ paymentLoading=true;
+ const button=document.querySelector('#payment-refresh');
  const container=document.querySelector('#payment-requests');
- const response=await fetch('/api/admin/payments');
- if(!response.ok){container.textContent='Unable to load payment requests.';return}
+ const status=document.querySelector('#payment-message');
+ if(button){button.disabled=true;button.classList.add('is-refreshing');button.setAttribute('aria-busy','true')}
+ try{
+ const response=await fetch('/api/admin/payments',{credentials:'same-origin',cache:'no-store'});
+ if(!response.ok)throw Error('Unable to refresh payment requests (HTTP '+response.status+').');
  const payments=await response.json();container.replaceChildren();
  if(!payments.length){container.textContent='No UPI payment requests yet.';return}
  for(const p of payments){
@@ -118,7 +125,16 @@ async function loadPayments(){
   }
   container.append(row);
  }
+ }catch(e){status.textContent=e.message}
+ finally{
+  paymentLoading=false;
+  if(button){button.disabled=false;button.classList.remove('is-refreshing');button.removeAttribute('aria-busy')}
+ }
 }
+document.querySelector('#payment-refresh')?.addEventListener('click',async()=>{
+ document.querySelector('#payment-message').textContent='';
+ await loadPayments();
+});
 
 function populateTelegramCourses(){
  const select=document.querySelector('#telegram-course');
