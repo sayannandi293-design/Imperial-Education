@@ -40,6 +40,16 @@ public class CommerceController {
   CourseCoupon c=coupons.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
   c.active=!c.active;return cv(coupons.save(c));
  }
+ @DeleteMapping("/api/admin/coupons/{id}")
+ @ResponseStatus(HttpStatus.NO_CONTENT)
+ @Transactional
+ public void couponDelete(@PathVariable Long id){
+  CourseCoupon coupon=coupons.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Coupon not found"));
+  // Payment history retains its submitted coupon code; deleting the coupon cannot
+  // alter the amount or approval status of any existing payment request.
+  coupons.delete(coupon);
+  coupons.flush();
+ }
  public record PublicOffer(String code,int percent,int maxUses,int remainingUses){}
  @GetMapping("/api/offers")
  public List<PublicOffer> activeOffers(){
