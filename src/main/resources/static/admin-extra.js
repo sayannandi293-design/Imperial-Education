@@ -46,9 +46,31 @@
   try{
    const items=await api('/api/admin/coupons');
    if(!items.length)area.textContent='No coupons yet.';
-   for(const c of items)row(area,c.code,c.percent+'% off · '+c.usedCount+' uses · '+(c.maxUses||'Unlimited')+' maximum · '+(c.active?'Active':'Disabled'),async()=>{
-    try{await api('/api/admin/coupons/'+c.id+'/toggle','POST');await coupons()}catch(e){alert(e.message)}
-   },c.active?'Disable':'Enable');
+   for(const c of items){
+    const item=row(area,c.code,c.percent+'% off · '+c.usedCount+' uses · '+(c.maxUses||'Unlimited')+' maximum · '+(c.active?'Active':'Disabled'));
+    const buttons=document.createElement('div');buttons.className='actions';
+    const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary-button';
+    toggle.textContent=c.active?'Disable':'Enable';
+    const remove=document.createElement('button');remove.type='button';remove.className='danger-button';remove.textContent='Delete';
+    toggle.onclick=async()=>{
+     toggle.disabled=true;remove.disabled=true;
+     try{await api('/api/admin/coupons/'+c.id+'/toggle','POST');await coupons()}
+     catch(e){document.querySelector('#coupon-admin-message').textContent=e.message;toggle.disabled=false;remove.disabled=false}
+    };
+    remove.onclick=async()=>{
+     if(!confirm('Permanently delete coupon '+c.code+'? It will stop working immediately. Existing payment requests will keep their recorded amounts and status.'))return;
+     toggle.disabled=true;remove.disabled=true;
+     try{
+      await api('/api/admin/coupons/'+c.id,'DELETE');
+      document.querySelector('#coupon-admin-message').textContent='Coupon '+c.code+' deleted.';
+      await coupons();
+     }catch(e){
+      document.querySelector('#coupon-admin-message').textContent=e.message;
+      toggle.disabled=false;remove.disabled=false;
+     }
+    };
+    buttons.append(toggle,remove);item.append(buttons);
+   }
   }catch(e){area.textContent=e.message}
  }
  document.querySelector('#coupon-form').onsubmit=async e=>{
