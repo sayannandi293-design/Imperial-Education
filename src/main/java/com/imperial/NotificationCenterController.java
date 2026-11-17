@@ -80,8 +80,13 @@ public class NotificationCenterController {
  }
  private NoticeList list(String recipient){
   Set<String> seen=new HashSet<>();
-  for(NotificationRead r:reads.findByRecipientKey(recipient))seen.add(r.getEventKey());
+  Set<String> dismissed=new HashSet<>();
+  for(NotificationRead r:reads.findByRecipientKey(recipient)){
+   seen.add(r.getEventKey());
+   if(r.isDismissed())dismissed.add(r.getEventKey());
+  }
   List<Notice> items=available(recipient).stream()
+   .filter(n->!dismissed.contains(n.id()))
    .sorted(Comparator.comparing(Notice::occurredAt).reversed())
    .limit(100)
    .map(n->new Notice(n.id(),n.title(),n.message(),n.category(),n.target(),n.occurredAt(),seen.contains(n.id())))
@@ -110,5 +115,25 @@ public class NotificationCenterController {
  @PostMapping("/api/admin/notifications/read") @Transactional
  public Map<String,Boolean> adminRead(@RequestBody MarkInput input){
   mark("ADMIN",input);return Map.of("read",true);
+ }
+ private void dismiss(String recipient,String id){
+  if(id==null||id.length()>100||!id.matches("[a-zA-Z0-9_-]+"))
+   throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid notification");
+  if(available(recipient).stream().noneMatch(n->n.id().equals(id)))
+   throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Notification not found");
+  NotificationRead saved=reads.findByRecipientKeyAndEventKey(recipient,id)
+   .orElseGet(()->new NotificationRead(recipient,id));
+  saved.dismiss();
+  reads.save(saved);
+ }
+ @DeleteMapping("/api/student/notifications/{id}") @Transactional
+ @ResponseStatus(HttpStatus.NO_CONTENT)
+ public void studentDismiss(Principal principal,@PathVariable String id){
+  dismiss(studentKey(current(principal).getId()),id);
+ }
+ @DeleteMapping("/api/admin/notifications/{id}") @Transactional
+ @ResponseStatus(HttpStatus.NO_CONTENT)
+ public void adminDismiss(@PathVariable String id){
+  dismiss("ADMIN",id);
  }
 }
