@@ -8,9 +8,12 @@ public class NotificationRead {
  @Column(name="recipient_key",nullable=false,length=80) private String recipientKey;
  @Column(name="event_key",nullable=false,length=100) private String eventKey;
  @Column(nullable=false) private Instant readAt=Instant.now();
+ @Column private Boolean dismissed=false;
  protected NotificationRead(){}
  public NotificationRead(String recipientKey,String eventKey){
   this.recipientKey=recipientKey;this.eventKey=eventKey;
  }
  public String getEventKey(){return eventKey;}
+ public boolean isDismissed(){return Boolean.TRUE.equals(dismissed);}
+ public void dismiss(){dismissed=true;}
 }
