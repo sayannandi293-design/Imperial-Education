@@ -21,7 +21,10 @@ public class SecurityConfig {
    return User.withUsername(a.getEmail()).password(a.getPasswordHash()).roles("STUDENT").build();
   };
  }
- @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
+ @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,
+  DatabaseRememberMeTokenRepository rememberTokens,
+  @Value("${REMEMBER_ME_KEY:${DB_PASSWORD:}}") String rememberKey) throws Exception {
+  if(rememberKey.isBlank())throw new IllegalStateException("Set REMEMBER_ME_KEY in Render environment to enable persistent logins");
   return http.csrf(csrf->csrf
     .csrfTokenRepository(new org.springframework.security.web.csrf.CookieCsrfTokenRepository())
     .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler()))
@@ -43,6 +46,12 @@ public class SecurityConfig {
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**"))
      .defaultAccessDeniedHandlerFor((request,response,exception)->response.sendError(403),
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**")))
+    .rememberMe(r->r.rememberMeParameter("remember-me")
+      .rememberMeCookieName("IE_REMEMBER")
+      .tokenRepository(rememberTokens)
+      .userDetailsService(users)
+      .tokenValiditySeconds(60*60*24*30)
+      .key(rememberKey))
     .sessionManagement(sm->sm.sessionFixation(sf->sf.migrateSession())
       .maximumSessions(2).maxSessionsPreventsLogin(false))
     .logout(l->l.logoutSuccessUrl("/"))
