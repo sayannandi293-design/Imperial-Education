@@ -18,7 +18,6 @@ public class StudentRememberMeServices extends PersistentTokenBasedRememberMeSer
   // Only the application's student login should be sticky. Admin sessions
   // remain ordinary browser sessions unless the admin explicitly opts in.
   String username=request.getParameter("username");
-  if(username!=null&&!username.trim().equalsIgnoreCase("admin"))return true;
-  return super.rememberMeRequested(request,parameter);
+  return username!=null&&!username.trim().equalsIgnoreCase("admin");
  }
 }
