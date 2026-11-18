@@ -46,12 +46,7 @@ public class SecurityConfig {
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**"))
      .defaultAccessDeniedHandlerFor((request,response,exception)->response.sendError(403),
        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/admin/**")))
-    .rememberMe(r->r.rememberMeParameter("remember-me")
-      .rememberMeCookieName("IE_REMEMBER")
-      .tokenRepository(rememberTokens)
-      .userDetailsService(users)
-      .tokenValiditySeconds(60*60*24*30)
-      .key(rememberKey))
+    .rememberMe(r->r.rememberMeServices(new StudentRememberMeServices(rememberKey,users,rememberTokens)))
     .sessionManagement(sm->sm.sessionFixation(sf->sf.migrateSession())
       .maximumSessions(2).maxSessionsPreventsLogin(false))
     .logout(l->l.logoutSuccessUrl("/"))
