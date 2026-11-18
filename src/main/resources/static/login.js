@@ -8,13 +8,6 @@
   toggle.textContent=show?'Hide':'Show';toggle.setAttribute('aria-label',show?'Hide password':'Show password');
   toggle.setAttribute('aria-pressed',String(show));
  });
- const username=document.querySelector('#login-email');
- const remember=document.querySelector('#remember-me');
- let rememberTouched=false;
- remember.addEventListener('change',()=>{rememberTouched=true});
- username.addEventListener('input',()=>{
-  if(!rememberTouched)remember.checked=username.value.trim().toLowerCase()!=='admin';
- });
  const params=new URLSearchParams(location.search);
  if(params.has('error'))status.textContent='Incorrect Gmail / Email or password. Try again.';
  if(params.has('logout'))status.textContent='You have signed out successfully.';
