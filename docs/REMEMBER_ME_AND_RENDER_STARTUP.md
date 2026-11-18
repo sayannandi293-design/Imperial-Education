@@ -1,11 +1,11 @@
 # IMPERIAL EDUCATION — buyer remember-me and Render start-up
 
 ## Persistent login
-- Students can select **Keep me signed in for 30 days on this device** (checked by default). Admin login defaults to unchecked.
+- Student logins automatically use a persistent remember-me cookie valid for up to 365 days on this device. Admin logins do not use persistent remember-me.
 - Spring Security's rotating persistent remember-me tokens are backed by the existing PostgreSQL database, so they survive backend restarts.
 - The existing HTTP session still expires according to SESSION_TIMEOUT (default 30m). With remember-me enabled and a valid cookie, subsequent visits can authenticate automatically.
 - Logout revokes remember-me login. Browser cookie deletion, private browsing, token theft protection, changes to signing key, or token expiry can also require re-login.
-- This is **30 days**, not unlimited login until Logout.
+- This is **up to 365 days**, not unlimited login until Logout. Browser privacy settings may clear cookies sooner.
 
 ## Render configuration
 - Recommended: set **REMEMBER_ME_KEY** to a stable, random 32+-character secret in Render Environment. Keep it unchanged between deployments. Do not share or commit it.
@@ -20,9 +20,9 @@ Official Render documentation: https://render.com/docs/free
 
 ## Test
 1. Verify deployment is Live and check startup logs.
-2. Sign in as Student with Keep me signed in checked; close/reopen browser, revisit /account.html, and confirm that re-authentication works.
+2. Sign in as Student; close/reopen browser, revisit /account.html, and confirm that re-authentication works.
 3. Wait beyond the short HTTP session timeout; verify remember-me restores the login on a subsequent request.
 4. Log out, close/reopen browser, and verify private Account page requires sign-in.
-5. Sign in again with Remember Me unchecked and confirm the login does not persist beyond session expiry.
-6. Use a separate private window to test Admin login (remember-me unchecked by default).
+5. Sign in as Admin and confirm the login does not persist beyond the normal session expiry.
+6. Use a separate private window to test Admin login (remember-me intentionally disabled).
 7. Verify coupon, payment review, Telegram, and notifications as before.
