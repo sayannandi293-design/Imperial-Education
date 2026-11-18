@@ -3,7 +3,7 @@
 <main class="auth-shell"><section class="admin-panel login-panel"><div class="eyebrow">WELCOME BACK</div><h1>Login</h1><p>Students: use your registered Gmail or Email address.</p><form method="post" action="/login" id="login-form">
 <label for="login-email">Gmail / Email</label><input id="login-email" name="username" type="text" autocomplete="username" placeholder="you@gmail.com" required maxlength="254" autocapitalize="none" spellcheck="false">
 <label for="login-password">Password</label><div class="password-visible"><input id="login-password" name="password" type="password" autocomplete="current-password" required><button id="toggle-password" type="button" class="secondary-button" aria-label="Show password" aria-pressed="false">Show</button></div>
-<label class="remember-me-choice"><input id="remember-me" type="checkbox" name="remember-me" value="on" checked> Keep me signed in for 30 days on this device</label>
+<p class="login-note">Student sign-in is remembered on this device for up to one year unless you log out or clear browser cookies. Avoid signing in on shared devices.</p>
 <button class="admin-button login-submit" type="submit" id="login-submit">Login</button>
 <p id="login-message" role="status" aria-live="polite"></p></form>
 <p><a href="/forgot-password.html">Forgot password?</a> · <a href="/register.html">Create student account</a></p><p class="login-note">Admin: continue using your existing admin login ID and password.</p></section></main><script src="/login.js"></script></body></html>
