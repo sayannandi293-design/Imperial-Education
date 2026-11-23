@@ -9,6 +9,10 @@
   toggle.setAttribute('aria-pressed',String(show));
  });
  const params=new URLSearchParams(location.search);
+ const next=params.get('next');
+ if(next&&/^\/checkout\.html\?course=[1-9][0-9]*(?:&coupon=[A-Za-z0-9_-]{3,40})?$/.test(next)){
+  form.action='/login?next='+encodeURIComponent(next);
+ }
  if(params.has('error'))status.textContent='Incorrect Gmail / Email or password. Try again.';
  if(params.has('logout'))status.textContent='You have signed out successfully.';
  if(!params.has('logout')&&!params.has('error')){
