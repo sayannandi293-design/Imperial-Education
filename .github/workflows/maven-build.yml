@@ -16,4 +16,4 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Compile and package
-        run: mvn -B -DskipTests package
+        run: mvn -B -s build/maven-settings.xml -DskipTests package
