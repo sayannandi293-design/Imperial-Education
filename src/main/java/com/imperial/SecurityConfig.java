@@ -29,12 +29,12 @@ public class SecurityConfig {
     .csrfTokenRepository(new org.springframework.security.web.csrf.CookieCsrfTokenRepository())
     .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler()))
    .authorizeHttpRequests(a->a
-    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/login","/login.html","/login.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/api/account/verification/**","/verify-email.html","/verify-email.js","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/offers","/api/visit").permitAll()
+    .requestMatchers("/","/index.html","/style.css","/app.js","/register.html","/register.js","/login","/login.html","/login.js","/actuator/health","/api/account/register","/api/account/csrf","/api/account/password/**","/api/account/verification/**","/verify-email.html","/verify-email.js","/forgot-password.html","/reset-password.html","/password.js","/policies.html","/faq.html","/api/session","/api/announcements","/api/offers","/api/visit","/checkout.html","/checkout.js").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/courses","/api/courses/**").permitAll()
     .requestMatchers("/notifications.js").authenticated()
     .requestMatchers("/admin.html","/admin.js","/admin-extra.js","/admin-sections.js","/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/payments/instructions").permitAll()
-    .requestMatchers("/api/student/**","/checkout.html","/checkout.js").hasRole("STUDENT")
+    .requestMatchers("/api/student/**").hasRole("STUDENT")
     .requestMatchers("/account.html","/account.js","/account-extra.js","/account-tabs.js","/api/account/me","/invoice.html","/invoice.js").hasRole("STUDENT")
     .anyRequest().denyAll())
     .formLogin(f->f.loginPage("/login.html").loginProcessingUrl("/login").failureUrl("/login.html?error").successHandler((request,response,authentication)->{
