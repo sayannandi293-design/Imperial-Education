@@ -39,7 +39,12 @@ public class SecurityConfig {
     .anyRequest().denyAll())
     .formLogin(f->f.loginPage("/login.html").loginProcessingUrl("/login").failureUrl("/login.html?error").successHandler((request,response,authentication)->{
      boolean admin=authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-     response.sendRedirect(admin?"/admin.html":"/account.html");
+     String next=request.getParameter("next");
+     if(!admin&&next!=null&&next.matches("^/checkout\\.html\\?course=[1-9][0-9]*(?:&coupon=[A-Za-z0-9_-]{3,40})?$")){
+      response.sendRedirect(next);
+     }else{
+      response.sendRedirect(admin?"/admin.html":"/account.html");
+     }
     }).permitAll())
     .exceptionHandling(e->e
      .defaultAuthenticationEntryPointFor((request,response,exception)->response.sendError(401),
