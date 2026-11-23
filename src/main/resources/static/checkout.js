@@ -7,6 +7,20 @@ function text(selector,value){document.querySelector(selector).textContent=value
 async function init(){
  try{
   if(!Number.isSafeInteger(courseId)||courseId<=0)throw Error('Invalid course. Return to the course list.');
+  const sr=await fetch('/api/session',{credentials:'same-origin',cache:'no-store'});
+  if(!sr.ok)throw Error('Unable to check your login. Reload this page.');
+  const session=await sr.json();
+  if(!session.signedIn||session.role!=='STUDENT'){
+   msg.replaceChildren();
+   const text=document.createElement('p');
+   text.textContent=session.role==='ADMIN'?'You are signed in as Admin. To purchase a course, sign out and sign in with a student account.':'Please sign in as a student to continue checkout.';
+   const link=document.createElement('a');
+   link.href='/login.html?next='+encodeURIComponent('/checkout.html?'+location.search.substring(1));
+   link.textContent=session.role==='ADMIN'?'Go to student sign-in':'Sign in to continue checkout';
+   msg.append(text,link);
+   document.querySelector('#checkout-course').textContent='Sign in to continue';
+   return;
+  }
   const [cr,pr,tr]=await Promise.all([fetch('/api/courses/'+courseId),fetch('/api/payments/instructions'),fetch('/api/account/csrf')]);
   if(!cr.ok)throw Error('Course not available.');
   if(!pr.ok||!tr.ok)throw Error('Please sign in as a student to continue.');
